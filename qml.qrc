@@ -1,6 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>Tile.qml</file>
+        <file>mainWindow.qml</file>
+        <file>TileManager/RowOfColumns.qml</file>
+        <file>TileManager/Tile.qml</file>
+        <file>TileManager/TileColumn.qml</file>
+        <file>TileFrontends/rss_tile/RssTile.qml</file>
+        <file>TileFrontends/text_tile/TextTile.qml</file>
     </qresource>
 </RCC>

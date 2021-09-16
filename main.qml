@@ -1,77 +1,74 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
+import QtQuick 2.15
+import QtQuick.Window 2.15
+import QtQuick.Layouts 1.12
+import QtQml.Models 2.12
+
+import "TileManager"
+import "TileFrontends/text_tile"
+import "TileFrontends/rss_tile"
 
 Window {
-    visible: true
+    id: root
     width: 640
     height: 480
-    title: qsTr("My Dashboard")
-
-    property var tileTree: {
-        "kind": "VBox",
-        "content": [
-           { "kind": "Tile" },
-           { "kind": "HBox",
-             "content" : [
-                 { "kind": "Tile" },
-                 { "kind": "Tile" },
-                 { "kind": "Tile" } ]
-           } ]
-    }
-
-    Component {
-        id: compVBox
-        Column {
-            Repeater {
-                model: modelContent
-                delegate: Loader {
-                    property var modelContent: modelData.content;
-                    sourceComponent: {
-                        if (modelData.kind === "Tile") return compTile;
-                        else if (modelData.kind === "VBox") return compVBox;
-                        else if (modelData.kind === "HBox") return compHBox;
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: compHBox
-        Row {
-            Repeater {
-                model: modelContent
-                delegate: Loader {
-                    property var modelContent: modelData.content;
-                    sourceComponent: {
-                        if (modelData.kind === "Tile") return compTile;
-                        else if (modelData.kind === "VBox") return compVBox;
-                        else if (modelData.kind === "HBox") return compHBox;
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: compTile
-        Tile {
-            width: 64
-            height: 64
-        }
-    }
+    visible: true
+    title: qsTr("Hello World")
 
     Column {
-        Repeater {
-            model: tileTree.content
-            delegate: Loader {
-                property var modelContent: modelData.content;
-                sourceComponent: {
-                    if (modelData.kind === "Tile") return compTile;
-                    else if (modelData.kind === "VBox") return compVBox;
-                    else if (modelData.kind === "HBox") return compHBox;
+        width: parent.width
+        spacing: 5
+
+        RowOfColumns {
+            width: parent.width
+            listObjectColumns: ObjectModel {
+                TileColumn {
+                    listTiles: ObjectModel {
+                        TextTile { color: "orange" }
+                        RssTile { color: "lightblue" }
+                        Tile { color: "blue" }
+                    }
+                }
+                TileColumn {
+                    listTiles: ObjectModel {
+                        Tile { color: "red" }
+                        Tile { color: "green" }
+                        Tile { color: "blue" }
+                    }
+                }
+                TileColumn {
+                    listTiles: ObjectModel {
+                        Tile { color: "yellow" }
+                        Tile { color: "grey" }
+                        Tile { color: "black" }
+                    }
                 }
             }
+        }
+        RowOfColumns {
+            width: parent.width
+            listObjectColumns: ObjectModel {
+                TileColumn {
+                    listTiles: ObjectModel {
+                        Tile { color: "yellow" }
+                        Tile { color: "grey" }
+                        Tile { color: "black" }
+                    }
+                }
+                TileColumn {
+                    listTiles: ObjectModel {
+                        Tile { color: "red" }
+                        Tile { color: "green" }
+                        Tile { color: "blue" }
+                    }
+                }
+            }
+        }
+
+        Text {
+            id: debugText
+            width: parent.width
+            height: 200
+            text: "running...\n"
         }
     }
 }
