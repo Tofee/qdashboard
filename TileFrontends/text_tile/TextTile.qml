@@ -3,8 +3,10 @@ import QtQuick.Controls 2.12
 
 import "../../TileManager"
 
-Tile {
+Item {
     id: rootItem
+
+    height: textEdit.implicitHeight
     
     property var configuration: {
         "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
@@ -28,7 +30,7 @@ Tile {
 
     TextEdit {
         id: textEdit
-        anchors.fill:  parent
+        width: parent.width
     }
 }
 

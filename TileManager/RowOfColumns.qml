@@ -7,9 +7,14 @@ import QtQuick.Controls 2.15
 
 SplitView {
     id: rowLayout
-    property ObjectModel listObjectColumns: ObjectModel {}
+    property ObjectModel listObjectColumns: ObjectModel { TileColumn{} }
 
     orientation: Qt.Horizontal
+
+    Component {
+        id: columnComponent
+        TileColumn {}
+    }
 
     Repeater {
         model: listObjectColumns
@@ -17,6 +22,11 @@ SplitView {
             // configure the TileColumn to be called when the height changes
             item.containerSplitView = rowLayout;
         }
+    }
+
+    function addColumn()
+    {
+        listObjectColumns.append(columnComponent.createObject(listObjectColumns));
     }
 
     Component.onCompleted: {

@@ -7,5 +7,6 @@
         <file>TileManager/TileColumn.qml</file>
         <file>TileFrontends/rss_tile/RssTile.qml</file>
         <file>TileFrontends/text_tile/TextTile.qml</file>
+        <file>TileManager/TileChooser.qml</file>
     </qresource>
 </RCC>

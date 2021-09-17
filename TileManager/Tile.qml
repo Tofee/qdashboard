@@ -2,10 +2,13 @@ import QtQuick 2.0
 
 Item {
     id: rootItem
-    height: 80; width: parent ? parent.width : 80;
-    property color color: "red"
+    height: dragRect.height;
+    width: parent ? parent.width : 80;
 
-    default property alias _data: contentItem.data
+    property alias tileTitle: tileTitleText.text
+    property alias backgroundColor: dragRect.color
+
+    default property alias contentItemSource: contentItemLoader.source
 
     // draw a frame:
     // _______________
@@ -16,10 +19,10 @@ Item {
     // |             |
     // ---------------
 
-    // bacground and border
+    // background and border
     Rectangle {
         id: dragRect
-        color: rootItem.color
+        color: "white"
         border {
             color: "grey"
             width: 1
@@ -27,7 +30,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         width: rootItem.width
-        height: rootItem.height
+        height: titleRect.height + contentItemLoader.height
 
         // drag and drop
         property Item parentTile: rootItem;
@@ -36,7 +39,7 @@ Item {
         Rectangle {
             id: titleRect
             color: "lightblue"
-            height: titleTitleText.implicitHeight*1.1
+            height: tileTitleText.implicitHeight*1.1
             anchors
             {
                 top: parent.top
@@ -46,7 +49,7 @@ Item {
             anchors.margins: parent.border.width
 
             Text {
-                id: titleTitleText
+                id: tileTitleText
                 anchors.centerIn: parent
                 text: "Title"
             }
@@ -65,16 +68,16 @@ Item {
             }
         }
 
-        Item {
-            id: contentItem
+        Loader {
+            id: contentItemLoader
             anchors
             {
                 top: titleRect.bottom
-                bottom: parent.bottom
                 left: parent.left
                 right: parent.right
             }
             anchors.margins: parent.border.width
+            source: "qrc:///TileManager/TileChooser.qml" // default source is a chooser
         }
 
         states: [

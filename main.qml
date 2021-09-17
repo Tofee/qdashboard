@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Layouts 1.12
 import QtQml.Models 2.12
+import QtQuick.Controls 2.12
 
 import "TileManager"
 import "TileFrontends/text_tile"
@@ -12,63 +13,34 @@ Window {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("QDashboard")
+
+    Component {
+        id: rowComponent
+        RowOfColumns {}
+    }
+
+    MouseArea {
+        z: 0
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: contextMenu.popup()
+
+        Menu {
+            id: contextMenu
+            MenuItem {
+                text: "New row"
+                onTriggered: {
+                    rowComponent.incubateObject(rootColumn, {width: Qt.binding(function() { return rootColumn.width; })});
+                }
+            }
+        }
+    }
 
     Column {
+        z: 1
+        id: rootColumn
         width: parent.width
         spacing: 5
-
-        RowOfColumns {
-            width: parent.width
-            listObjectColumns: ObjectModel {
-                TileColumn {
-                    listTiles: ObjectModel {
-                        TextTile { color: "orange" }
-                        RssTile { color: "lightblue" }
-                        Tile { color: "blue" }
-                    }
-                }
-                TileColumn {
-                    listTiles: ObjectModel {
-                        Tile { color: "red" }
-                        Tile { color: "green" }
-                        Tile { color: "blue" }
-                    }
-                }
-                TileColumn {
-                    listTiles: ObjectModel {
-                        Tile { color: "yellow" }
-                        Tile { color: "grey" }
-                        Tile { color: "black" }
-                    }
-                }
-            }
-        }
-        RowOfColumns {
-            width: parent.width
-            listObjectColumns: ObjectModel {
-                TileColumn {
-                    listTiles: ObjectModel {
-                        Tile { color: "yellow" }
-                        Tile { color: "grey" }
-                        Tile { color: "black" }
-                    }
-                }
-                TileColumn {
-                    listTiles: ObjectModel {
-                        Tile { color: "red" }
-                        Tile { color: "green" }
-                        Tile { color: "blue" }
-                    }
-                }
-            }
-        }
-
-        Text {
-            id: debugText
-            width: parent.width
-            height: 200
-            text: "running...\n"
-        }
     }
 }
