@@ -19,4 +19,12 @@ Column {
             rootTileChooser.parent.source = "qrc:///TileFrontends/text_tile/TextTile.qml";
         }
     }
+    Button {
+        width: parent.width
+        text: "Weather tile"
+        onClicked: {
+            // change the Loader's source
+            rootTileChooser.parent.source = "qrc:///TileFrontends/weather_tile/WeatherTile.qml";
+        }
+    }
 }

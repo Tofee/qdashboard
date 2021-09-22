@@ -7,32 +7,65 @@ import QtQuick.Controls 2.15
 
 SplitView {
     id: rowLayout
-    property ObjectModel listObjectColumns: ObjectModel { TileColumn{} }
+    property ObjectModel listObjectColumns: ObjectModel {}
 
     orientation: Qt.Horizontal
 
     Component {
         id: columnComponent
-        TileColumn {}
+        TileColumn {
+            onColumnHeightChanged: rowLayout.refreshHeight();
+            onAddColumn: rowLayout.addColumn();
+
+            Component.onDestruction: {
+                for(var i=0; i<listObjectColumns.count; ++i) {
+                    if(listObjectColumns.get(i) === this) {
+                        listObjectColumns.remove(i);
+                        break;
+                    }
+                }
+
+                if(listObjectColumns.count === 0) {
+                    rowLayout.destroy();
+                }
+            }
+        }
     }
 
     Repeater {
         model: listObjectColumns
-        onItemAdded: {
-            // configure the TileColumn to be called when the height changes
-            item.containerSplitView = rowLayout;
-        }
     }
 
     function addColumn()
     {
-        listObjectColumns.append(columnComponent.createObject(listObjectColumns));
+        var newColumn = columnComponent.createObject(listObjectColumns);
+        listObjectColumns.append(newColumn);
+
+        newColumn.addTile();
+    }
+
+    function serializeSession() {
+        // get content for each column in the splitview
+        var columnArray = new Array;
+        for (var i = 0; i < listObjectColumns.count; ++i) {
+            var column = listObjectColumns.get(i).serializeSession();
+            columnArray.push(column);
+        }
+
+        return {
+            "columns": columnArray
+        };
+    }
+    function deserializeSession(sessionObject) {
+        for(var i = 0; i < sessionObject.columns.length; ++i) {
+            var newColumn = columnComponent.createObject(listObjectColumns);
+            newColumn.deserializeSession(sessionObject.columns[i]);
+
+            listObjectColumns.append(newColumn);
+        }
     }
 
     Component.onCompleted: {
-        for (var i = 0; i < listObjectColumns.count; ++i )
-            listObjectColumns.get(i).containerSplitView = rowLayout;
-
         refreshHeight();
     }
 
@@ -44,7 +77,5 @@ SplitView {
             newHeight = Math.max(newHeight, listObjectColumns.get(i).columnHeight);
 
         rowLayout.height = newHeight;
-
-        debugText.text += "count: " + listObjectColumns.count + "; newHeight = " + newHeight + "\n";
     }
 }

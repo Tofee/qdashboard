@@ -5,18 +5,29 @@ import QtQuick.Controls 2.15
 Item {
     id: colWrapper
     height: col.height
-    SplitView.preferredWidth: 150
+    SplitView.minimumWidth: 50
 
-    property ObjectModel listTiles: ObjectModel { Tile {} }
+    property ObjectModel listTiles: ObjectModel {}
 
-    // todo: find a nicer way to update the SplitView's height
     property alias columnHeight: col.height
-    property SplitView containerSplitView
-    onColumnHeightChanged: if(containerSplitView) containerSplitView.refreshHeight();
+    signal addColumn()
 
     Component {
         id: tileComponent
-        Tile {}
+        Tile {
+            Component.onDestruction: {
+                for(var i=0; i<listTiles.count; ++i) {
+                    if(listTiles.get(i) === this) {
+                        listTiles.remove(i);
+                        break;
+                    }
+                }
+
+                if(listTiles.count === 0) {
+                    colWrapper.destroy();
+                }
+            }
+        }
     }
 
     Column {
@@ -37,13 +48,13 @@ Item {
             MenuItem {
                 text: "New tile"
                 onTriggered: {
-                    listTiles.append(tileComponent.createObject(listTiles));
+                    addTile();
                 }
             }
             MenuItem {
                 text: "New column"
                 onTriggered: {
-                    if(containerSplitView) containerSplitView.addColumn();
+                    addColumn();
                 }
             }
         }
@@ -54,6 +65,36 @@ Item {
         onDropped: {
             listTiles.append(drag.source.parentTile);
         }
+    }
+
+    function addTile() {
+        var newTile = tileComponent.createObject(listTiles);
+        listTiles.append(newTile);
+    }
+
+    function serializeSession() {
+        // get content for each line in tile column
+        var tileArray = new Array;
+        for (var i = 0; i < listTiles.count; ++i) {
+            var tile = listTiles.get(i).serializeSession();
+            tileArray.push(tile);
+        }
+
+        return {
+            "width": colWrapper.width,
+            "tiles": tileArray
+        };
+    }
+
+    function deserializeSession(sessionObject) {
+        for(var i = 0; i < sessionObject.tiles.length; ++i) {
+            var newTile = tileComponent.createObject(listTiles, { "contentItemSource": "" }); // skip the chooser
+            newTile.deserializeSession(sessionObject.tiles[i]);
+
+            listTiles.append(newTile);
+        }
+
+        colWrapper.implicitWidth = sessionObject.width;
     }
 }
 

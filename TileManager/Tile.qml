@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 Item {
     id: rootItem
@@ -12,7 +13,7 @@ Item {
 
     // draw a frame:
     // _______________
-    // |    title    |
+    // |    title   X|
     // - - - - - - - -
     // |             |
     // |   WIDGET    |
@@ -66,6 +67,14 @@ Item {
                     dragRect.Drag.drop();
                 }
             }
+
+            Button {
+                text: "X"
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                onClicked: rootItem.destroy();
+            }
         }
 
         Loader {
@@ -94,5 +103,23 @@ Item {
         Drag.active: mouseArea.drag.active
         Drag.hotSpot.x: dragRect.width / 2
         Drag.hotSpot.y: dragRect.height / 2
+    }
+
+    function serializeSession() {
+        // get content for the tile
+        var tileItem = contentItemLoader.item;
+        var tileContent = {};
+        if(tileItem && tileItem.serializeSession) tileContent = tileItem.serializeSession();
+
+        return {
+            "source": contentItemLoader.source,
+            "content": tileContent
+        };
+    }
+    function deserializeSession(sessionObject) {
+        contentItemLoader.source = sessionObject.source; // this will load the corresponding tile
+
+        if(contentItemLoader.item && contentItemLoader.item.deserializeSession)
+            contentItemLoader.item.deserializeSession(sessionObject.content);
     }
 }

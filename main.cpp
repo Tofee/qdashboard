@@ -1,30 +1,41 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtGlobal>
 
-#if 0
-#define KDDOCKWIDGETS_QTQUICK 1
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <kddockwidgets/DockWidgetQuick.h>
-#include <kddockwidgets/Config.h>
-#include <kddockwidgets/private/DockRegistry_p.h>
-#include <kddockwidgets/FrameworkWidgetFactory.h>
-
-// clazy:excludeall=qstring-allocations
-
-using namespace KDDockWidgets;
+// Propose a fallback value for qdashboard-server root URI
+#ifndef QDASHBOARD_SERVER_BASE_URI
+#define QDASHBOARD_SERVER_BASE_URI "/qdashboard/api"
 #endif
+
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    QString strType = "";
+    FILE *output = stderr;
+    switch (type) {
+    case QtDebugMsg: strType = "Debug"; break;
+    case QtInfoMsg: strType = "Info"; break;
+    case QtWarningMsg: strType = "Warning"; output = stderr; break;
+    case QtCriticalMsg: strType = "Critical"; output = stderr; break;
+    case QtFatalMsg: strType = "Fatal"; output = stderr; break;
+    }
+
+    fprintf(output, "%s (%s:%u, %s): %s\n", strType.toLocal8Bit().constData(), context.file, context.line, context.function, localMsg.constData());
+}
 
 int main(int argc, char *argv[])
 {
-#if 0
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(kddockwidgets_resources);
-#endif
-#endif
-
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+//    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 #endif
     QGuiApplication app(argc, argv);
 
@@ -39,41 +50,14 @@ int main(int argc, char *argv[])
                                      if (!obj && url == objUrl)
                                          QCoreApplication::exit(-1);
                                  }, Qt::QueuedConnection);
+
+    qInstallMessageHandler(myMessageOutput); // Install the handler
+
+    appEngine.setInitialProperties({
+           { "serverBaseURI", QString(QDASHBOARD_SERVER_BASE_URI) },
+           { "openweatherApiKey", QString(STR(OPENWEATHER_API_KEY)) }
+    });
+
     appEngine.load(url);
-
-#if 0
-    // Create your engine which loads main.qml. A simple QQuickView would work too.
-    KDDockWidgets::Config::self().setQmlEngine(&appEngine);
-
-    // Below we illustrate usage of our C++ API. Alternative you can use declarative API.
-    // See main.qml for examples of dockwidgets created directly in QML
-
-    auto dw1 = new KDDockWidgets::DockWidgetQuick("Dock #1");
-    dw1->setWidget(QStringLiteral("qrc:/rss_tile/RssTile.qml"));
-    dw1->resize(QSize(400, 200));
-    dw1->show();
-
-    auto dw2 = new KDDockWidgets::DockWidgetQuick("Dock #2");
-    dw2->setWidget(QStringLiteral("qrc:/text_tile/TextTile.qml"));
-    dw2->resize(QSize(400, 200));
-    dw2->show();
-
-    auto dw3 = new KDDockWidgets::DockWidgetQuick("Dock #3");
-    dw3->setWidget(QStringLiteral("qrc:/text_tile/TextTile.qml"));
-    dw2->resize(QSize(400, 200));
-    dw3->show();
-
-    auto dw4 = new KDDockWidgets::DockWidgetQuick("Dock #4");
-    dw4->setWidget(QStringLiteral("qrc:/rss_tile/RssTile.qml"));
-    dw4->resize(QSize(400, 200));
-    dw4->show();
-
-    KDDockWidgets::MainWindowBase *mainWindow = KDDockWidgets::DockRegistry::self()->mainwindows().constFirst();
-
-    mainWindow->addDockWidget(dw1, KDDockWidgets::Location_OnTop);
-    mainWindow->addDockWidget(dw2, KDDockWidgets::Location_OnBottom);
-    mainWindow->addDockWidget(dw3, KDDockWidgets::Location_OnRight, dw2);
-    mainWindow->addDockWidget(dw4, KDDockWidgets::Location_OnRight, dw3);
-#endif
     return app.exec();
 }

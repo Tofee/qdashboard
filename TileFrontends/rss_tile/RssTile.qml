@@ -17,7 +17,6 @@ Item {
         "headerColor": "darkgrey",
     }
 
-    property string _rootURI: "https://localhost/qdashboard/"
     property var url: configuration.url
     property int refresh: 1000 * configuration.refresh
     property var backColor: configuration.backColor
@@ -52,8 +51,7 @@ Item {
             console.log("URL: "+_getServiceURL(url));
             xhr.open("GET", _getServiceURL(url));
             xhr.onreadystatechange = function() {
-                if (xhr.readyState == XMLHttpRequest.DONE) {
-                    console.log("response: "+xhr.responseText);
+                if (xhr.readyState === XMLHttpRequest.DONE) {
                     var rootObj = JSON.parse(xhr.responseText);
                     for (var b in rootObj.rss.channel.item) {
                         jsonModel.append(rootObj.rss.channel.item[b]);
@@ -64,7 +62,7 @@ Item {
         }
 
         function _getServiceURL(origUrl) {
-            return _rootURI+"api/rss_tile/content/" + Qt.btoa(origUrl)
+            return serverBaseURI+"/rss_tile/content/" + Qt.btoa(origUrl)
         }
     }
 
@@ -206,6 +204,17 @@ Item {
         }    
     }
     
+    function serializeSession() {
+        // get content for the tile
+        return {
+            "feed": configuration.url,
+            "refresh": configuration.refresh
+        };
+    }
+    function deserializeSession(sessionObject) {
+        configuration.url = sessionObject.feed;
+        configuration.refresh = sessionObject.refresh;
+    }
 }
 
 

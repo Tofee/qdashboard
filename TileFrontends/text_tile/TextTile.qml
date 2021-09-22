@@ -3,27 +3,20 @@ import QtQuick.Controls 2.12
 
 import "../../TileManager"
 
-Item {
+FocusScope {
     id: rootItem
 
     height: textEdit.implicitHeight
-    
-    property var configuration: {
-        "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
-        "refresh": 600,
-        "backColor": "white",
-        "foreColor": "black",
-        "headerColor": "darkgrey",
+
+    onActiveFocusChanged: {
+        var currentText = textEdit.text;
+        textEdit.textFormat = rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText;
+        textEdit.text = "";
+        textEdit.text = currentText;
     }
 
-    property var url: configuration.url
-    property int refresh: 1000 * configuration.refresh
-    property var backColor: configuration.backColor
-    property var foreColor: configuration.foreColor
-    property var headerColor: configuration.headerColor
-        
     Rectangle {
-        visible: textEdit.focus
+        visible: rootItem.activeFocus
         anchors.fill:  parent
         color: "lightBlue"
     }
@@ -31,6 +24,19 @@ Item {
     TextEdit {
         id: textEdit
         width: parent.width
+
+        font.pointSize: 10
+        textFormat: rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText
+    }
+
+    function serializeSession() {
+        // get content for the tile
+        return {
+            "text": textEdit.text
+        };
+    }
+    function deserializeSession(sessionObject) {
+        textEdit.text = sessionObject.text;
     }
 }
 
