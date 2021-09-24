@@ -9,6 +9,9 @@
 #ifndef QDASHBOARD_SERVER_BASE_URI
 #define QDASHBOARD_SERVER_BASE_URI "/qdashboard/api"
 #endif
+#ifndef OPENWEATHER_API_KEY
+#define OPENWEATHER_API_KEY 0123456789abcdef
+#endif
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
