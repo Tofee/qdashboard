@@ -10,38 +10,21 @@ TileContentBase {
 
     height: 200;
 
-    property var configuration: {
-        "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
-        "refresh": 600,
-        "backColor": "white",
-        "foreColor": "black",
-        "headerColor": "darkgrey",
-    }
+    property string url: "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+    property int refresh_seconds: 600;
+    property int refresh: 1000 * 600
 
-    property var url: configuration.url
-    property int refresh: 1000 * configuration.refresh
-    property var backColor: configuration.backColor
-    property var foreColor: configuration.foreColor
-    property var headerColor: configuration.headerColor
+    onUrlChanged: jsonModel.refresh();
         
-    function stripString (str) {
+    function stripHtml (str, maxlen) {
+        var regex = /<\/?[^>]+(>|$)/gi;
+        str = str.replace(regex, "");
+        str = str.replace(/\n/gi, " ");
+        return str.substring(0, maxlen);
+    }
+    function stripImages (str) {
         var regex = /(<img.*?>)/gi;
         str = str.replace(regex, "");
-        regex = /&#228;/gi;
-        str = str.replace(regex, "ä");
-        regex = /&#246;/gi;
-        str = str.replace(regex, "ö");
-        regex = /&#252;/gi;
-        str = str.replace(regex, "ü");
-        regex = /&#196;/gi;
-        str = str.replace(regex, "Ä");
-        regex = /&#214;/gi;
-        str = str.replace(regex, "Ö");
-        regex = /&#220;/gi;
-        str = str.replace(regex, "Ü");
-        regex = /&#223;/gi;
-        str = str.replace(regex, "ß");
-        
         return str;
     }
     
@@ -58,11 +41,26 @@ TileContentBase {
                     jsonModel.clear();
 
                     var rootObj = JSON.parse(xhr.responseText);
-                    for (var b in rootObj.rss.channel.item) {
-                        jsonModel.append(rootObj.rss.channel.item[b]);
-                    }
 
-                    rootTile.setupTitle(rootObj.rss.channel.title);
+                    if(rootObj.rss) {
+                        // RSS feed
+                        for (var i_item in rootObj.rss.channel.item) {
+                            jsonModel.append(rootObj.rss.channel.item[i_item]);
+                        }
+                        rootTile.setupTitle(rootObj.rss.channel.title);
+                    }
+                    else if(rootObj.feed){
+                        // Atom feed
+                        for (var i_entry in rootObj.feed.entry) {
+                            var atomEntry = rootObj.feed.entry[i_entry];
+                            jsonModel.append({
+                                                 "title": atomEntry.title,
+                                                 "description": atomEntry.content['#text'],
+                                                 "pubDate": atomEntry.published
+                                             });
+                        }
+                        rootTile.setupTitle(rootObj.feed.title);
+                    }
                 }
             }
             xhr.send();
@@ -77,7 +75,7 @@ TileContentBase {
         id: feedDelegate
         Item {
             height: layout.height;
-            width: parent.width-20;
+            width: thefeed.width-20;
 
             RowLayout {
                 id: layout
@@ -87,17 +85,18 @@ TileContentBase {
                 Text {
                     id: titleText
                     Layout.fillWidth: true
-                    Layout.minimumWidth: implicitWidth
                     font.weight: Font.Bold
                     font.pixelSize: 12
                     text: title
+                    elide: Text.ElideRight
                 }
                 Text {
-                    Layout.maximumWidth: parent.width - titleText.implicitWidth - dateText.implicitWidth
+                    visible: Layout.preferredWidth>0
+                    Layout.preferredWidth: parent.width - layout.spacing*2 - titleText.implicitWidth - dateText.implicitWidth
                     font.pixelSize: 12
                     font.weight: Font.Light
                     elide: Text.ElideRight
-                    text: stripString(description)
+                    text: stripHtml(description, 100)
                 }
                 Text {
                     id: dateText
@@ -111,7 +110,7 @@ TileContentBase {
 
             ToolTip.delay: 500
             ToolTip.visible: itemMouseArea.containsMouse
-            ToolTip.text: stripString(description)
+            ToolTip.text: stripImages(description)
 
             MouseArea{
                 id: itemMouseArea
@@ -139,6 +138,17 @@ TileContentBase {
         anchors.fill:  parent
         spacing: 2
         model: jsonModel
+        header: TextField {
+            width: parent.width
+
+            id: urlTextField
+            text: rootTile.url
+            onEditingFinished: {
+                rootTile.url = urlTextField.text;
+            }
+            font.pixelSize: 12
+        }
+
         delegate: feedDelegate
         snapMode: ListView.SnapToItem
     }
@@ -164,13 +174,13 @@ TileContentBase {
     function serializeSession() {
         // get content for the tile
         return {
-            "feed": configuration.url,
-            "refresh": configuration.refresh
+            "feed": rootTile.url,
+            "refresh": rootTile.refresh_seconds
         };
     }
     function deserializeSession(sessionObject) {
-        configuration.url = sessionObject.feed;
-        configuration.refresh = sessionObject.refresh;
+        rootTile.url = sessionObject.feed;
+        rootTile.refresh_seconds = sessionObject.refresh;
     }
 }
 
