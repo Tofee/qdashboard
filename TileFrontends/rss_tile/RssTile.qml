@@ -108,10 +108,16 @@ TileContentBase {
                     }
                 }
             }
+
+            ToolTip.delay: 500
+            ToolTip.visible: itemMouseArea.containsMouse
+            ToolTip.text: stripString(description)
+
             MouseArea{
                 id: itemMouseArea
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
+                hoverEnabled: true
                 onClicked: {
                     if (mouse.button == Qt.LeftButton)
                     {
