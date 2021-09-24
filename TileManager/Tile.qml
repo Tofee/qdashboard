@@ -69,10 +69,15 @@ Item {
             }
 
             Button {
-                text: "X"
+                padding: 0
+                icon.source: "qrc:///TileManager/images/close.svg"
+                icon.color: "transparent"
+                icon.height: titleRect.height
+                icon.width: titleRect.height
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
+                width: icon.width
                 onClicked: rootItem.destroy();
             }
         }
@@ -87,6 +92,12 @@ Item {
             }
             anchors.margins: parent.border.width
             source: "qrc:///TileManager/TileChooser.qml" // default source is a chooser
+        }
+        Connections {
+            target: contentItemLoader.item
+            function onSetupTitle(newTitle) {
+                rootItem.tileTitle = newTitle;
+            }
         }
 
         states: [

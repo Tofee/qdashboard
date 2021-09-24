@@ -27,5 +27,7 @@
         <file>TileFrontends/weather_tile/images/weather/13n@2x.png</file>
         <file>TileFrontends/weather_tile/images/weather/50d@2x.png</file>
         <file>TileFrontends/weather_tile/images/weather/50n@2x.png</file>
+        <file>TileManager/TileContentBase.qml</file>
+        <file>TileManager/images/close.svg</file>
     </qresource>
 </RCC>

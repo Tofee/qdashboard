@@ -1,14 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.12
+import QtQuick.Layouts 1.12
 
 import "../../TileManager"
 
-Item {
+TileContentBase {
     id: rootTile
 
     height: 200;
-    
+
     property var configuration: {
         "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
         "refresh": 600,
@@ -46,16 +47,22 @@ Item {
     
     ListModel {
         id: jsonModel
-        Component.onCompleted: {
+        Component.onCompleted: jsonModel.refresh()
+
+        function refresh () {
             var xhr = new XMLHttpRequest;
             console.log("URL: "+_getServiceURL(url));
             xhr.open("GET", _getServiceURL(url));
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
+                    jsonModel.clear();
+
                     var rootObj = JSON.parse(xhr.responseText);
                     for (var b in rootObj.rss.channel.item) {
                         jsonModel.append(rootObj.rss.channel.item[b]);
                     }
+
+                    rootTile.setupTitle(rootObj.rss.channel.title);
                 }
             }
             xhr.send();
@@ -68,122 +75,66 @@ Item {
 
     Component {
         id: feedDelegate
-        Rectangle {
+        Item {
             height: layout.height;
-            width: thefeed.width;
-            color: backColor
-            Item     {
-                height: layout.height;
-                width: thefeed.width;
-                Column {
-                    id: layout;
-                    Row {
-                        Text {
-                            wrapMode: "WordWrap";
-                            font.pixelSize: 12;
-                            color: foreColor;
-                            font.bold: true;
-                            text: title }
-                    }
-                    Row {
-                        Text {
-                            width: thefeed.width;
-                            wrapMode: "WordWrap";
-                            font.pixelSize: 9;
-                            color: headerColor;
-                            font.bold: false;
-                            text: pubDate }
-                    }
-                    Row {
-                        Text {
-                            width: thefeed.width;
-                            wrapMode: "WordWrap";
-                            font.pixelSize: 12;
-                            color: foreColor;
-                            font.bold: false;
-                            text: stripString(description) }
-                    }
-                    Row {
-                        Rectangle {
-                            width: thefeed.width;
-                            color: foreColor;
-                            height: 1;
-                        }
-                    }
-                    
-                }
-                MouseArea{
-                    id: itemMouseArea
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    anchors.fill: parent
-                    onClicked: {
-                        if (mouse.button == Qt.LeftButton)
-                        {
-                            Qt.openUrlExternally(link)
-                        }
-                        else if (mouse.button == Qt.RightButton)
-                        {
-                            contextMenu.popup()
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
-    
-    Component {
-        id: header
-        Rectangle {
-            width: thefeed.width; height: 19
-            color: backColor
-            Item {
-                width: thefeed.width; height: 19
+            width: parent.width-20;
+
+            RowLayout {
+                id: layout
+                width: parent.width
+                height: titleText.implicitHeight
+
                 Text {
-                    horizontalAlignment: Text.AlignRight
-                    width: thefeed.width; height: 8
-                    font.pixelSize: 9;
-                    text: url;
-                    color: headerColor
-                    
+                    id: titleText
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: implicitWidth
+                    font.weight: Font.Bold
+                    font.pixelSize: 12
+                    text: title
                 }
-                Rectangle {
-                    y: 11
-                    width: thefeed.width; height: 8
-                    color: headerColor
+                Text {
+                    Layout.maximumWidth: parent.width - titleText.implicitWidth - dateText.implicitWidth
+                    font.pixelSize: 12
+                    font.weight: Font.Light
+                    elide: Text.ElideRight
+                    text: stripString(description)
+                }
+                Text {
+                    id: dateText
+                    Layout.minimumWidth: implicitWidth
+                    font.pixelSize: 9;
+                    text: {
+                        return new Date(pubDate).toLocaleString(Qt.locale(), Locale.ShortFormat)
+                    }
+                }
+            }
+            MouseArea{
+                id: itemMouseArea
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                anchors.fill: parent
+                onClicked: {
+                    if (mouse.button == Qt.LeftButton)
+                    {
+                        Qt.openUrlExternally(link)
+                    }
+                    else if (mouse.button == Qt.RightButton)
+                    {
+                        contextMenu.popup()
+                    }
                 }
             }
         }
     }
     
-    Component {
-        id: footer
-        Rectangle {
-            width: thefeed.width; height: 8
-            color: headerColor
-        }
-    }    
     ListView {
         id: thefeed
-        maximumFlickVelocity: 2500
         clip: true
-        width: parent.width-20
+        width: parent.width
         anchors.fill:  parent
         spacing: 2
         model: jsonModel
         delegate: feedDelegate
-        header: header
-        footer: footer
         snapMode: ListView.SnapToItem
-    }
-    MouseArea {
-        id: itemMouseArea
-        acceptedButtons: Qt.RightButton
-        anchors.fill: parent
-        onClicked: {
-            //              right button is clicked
-            contextMenu.popup()
-        }
     }
     
     Timer {        
@@ -191,15 +142,15 @@ Item {
         interval: refresh
         running: true
         repeat: true
-        onTriggered: { xmlModel.reload() }
-    }    
+        onTriggered: { jsonModel.refresh() }
+    }
     
     Menu {
         id: contextMenu
         MenuItem {
             text: "Reload"
             onTriggered: {
-                xmlModel.reload()
+                jsonModel.refresh()
             }
         }    
     }

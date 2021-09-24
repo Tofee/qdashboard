@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 
 import "../../TileManager"
 
-FocusScope {
+TileContentBase {
     id: rootItem
 
     height: textEdit.implicitHeight
@@ -27,6 +27,7 @@ FocusScope {
 
         font.pointSize: 10
         textFormat: rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText
+        wrapMode: Text.WordWrap
     }
 
     function serializeSession() {
