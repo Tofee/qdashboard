@@ -5,29 +5,81 @@ import QtQuick.Layouts 1.12
 import QtQml.Models 2.12
 import QtQuick.Controls 2.15
 
-SplitView {
+RowLayout {
     id: rowLayout
+    spacing: 0
     property ObjectModel listObjectColumns: ObjectModel {}
-
-    orientation: Qt.Horizontal
 
     Component {
         id: columnComponent
-        TileColumn {
-            onColumnHeightChanged: rowLayout.refreshHeight();
-            onAddColumn: rowLayout.addColumn();
+        Item {
+            id: titleColumnWrapper
+            property real weight: 1.0 // by defautl, each column weights the same. Total weight is always listObjectColumns.count.
+            property Item wrappedColumn: titleColumn
 
-            Component.onDestruction: {
-                for(var i=0; i<listObjectColumns.count; ++i) {
-                    if(listObjectColumns.get(i) === this) {
-                        listObjectColumns.remove(i);
-                        break;
+            Layout.preferredHeight: titleColumn.height
+            Layout.alignment: Qt.AlignTop
+            Layout.minimumWidth: 100
+            Layout.preferredWidth: rowLayout.width*(weight/listObjectColumns.count);
+
+            property real _minWeight: (Layout.minimumWidth/rowLayout.width)*listObjectColumns.count;
+
+            TileColumn {
+                id: titleColumn
+                width: parent.width - colHandle.width
+                anchors.left: parent.left
+                anchors.top: parent.top
+
+                onAddColumn: rowLayout.addColumn();
+
+                Component.onDestruction: {
+                    for(var i=0; i<listObjectColumns.count; ++i) {
+                        if(listObjectColumns.get(i) === this.parent) {
+                            listObjectColumns.remove(i);
+                            break;
+                        }
+                    }
+
+                    if(listObjectColumns.count === 0) {
+                        rowLayout.destroy();
                     }
                 }
+            }
+            // handle
+            Rectangle {
+                id: colHandle
+                anchors.left: titleColumn.right
+                anchors.top: parent.top
+                width: 4
+                height: titleColumn.height
+                color: "red"
 
-                if(listObjectColumns.count === 0) {
-                    rowLayout.destroy();
+                MouseArea {
+                    anchors.fill: parent
+                    drag{ target: parent; axis: Drag.XAxis }
+                    onMouseXChanged: {
+                        if(drag.active) {
+                            var newWidth = titleColumnWrapper.width + mouseX;
+                            var deltaWeight = newWidth*listObjectColumns.count/rowLayout.width - titleColumnWrapper.weight;
+                            if (_minWeight < titleColumnWrapper.weight + deltaWeight &&
+                                _minWeight < listObjectColumns.get(titleColumnWrapper.ObjectModel.index+1).weight - deltaWeight)
+                            {
+                                titleColumnWrapper.weight += deltaWeight;
+                                listObjectColumns.get(titleColumnWrapper.ObjectModel.index+1).weight -= deltaWeight;
+                            }
+                        }
+                    }
                 }
+            }
+
+            function addTile() {
+                titleColumn.addTile();
+            }
+            function serializeSession() {
+                return titleColumn.serializeSession();
+            }
+            function deserializeSession(sessionObject) {
+                titleColumn.deserializeSession(sessionObject);
             }
         }
     }
@@ -63,19 +115,5 @@ SplitView {
 
             listObjectColumns.append(newColumn);
         }
-    }
-
-    Component.onCompleted: {
-        refreshHeight();
-    }
-
-    // hacky refresh, but otherwise the SplitView will impose its height
-    // on all the children TileColumn items
-    function refreshHeight() {
-        var newHeight = 0;
-        for (var i = 0; i < listObjectColumns.count; ++i )
-            newHeight = Math.max(newHeight, listObjectColumns.get(i).columnHeight);
-
-        rowLayout.height = newHeight;
     }
 }

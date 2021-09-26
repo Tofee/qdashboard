@@ -35,10 +35,10 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-//    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-//    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+//    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 #endif
     QGuiApplication app(argc, argv);
 
