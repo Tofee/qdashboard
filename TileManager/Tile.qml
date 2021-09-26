@@ -98,7 +98,7 @@ Item {
             anchors.margins: parent.border.width
             source: tileModel.source
 
-            property var tileModelContent: tileModel.contentModel
+            property var loaderTileModelContent: tileModel.contentModel
         }
         Connections {
             target: contentItemLoader.item

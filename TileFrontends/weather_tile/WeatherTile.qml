@@ -140,13 +140,12 @@ TileContentBase {
         }
     }
 
-    function serializeSession() {
-        // get content for the tile
-        return {
+    function saveToModel() {
+        tileModelContent = {
             "place": root.place
         };
     }
-    function deserializeSession(sessionObject) {
-        root.place = sessionObject.place;
+    function initFromModel() {
+        root.place = tileModelContent.place;
     }
 }

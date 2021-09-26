@@ -28,16 +28,17 @@ TileContentBase {
         font.pointSize: 10
         textFormat: rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText
         wrapMode: Text.WordWrap
+
+        onTextChanged: saveToModel()
     }
 
-    function serializeSession() {
-        // get content for the tile
-        return {
+    function saveToModel() {
+        tileModelContent = {
             "text": textEdit.text
         };
     }
-    function deserializeSession(sessionObject) {
-        textEdit.text = sessionObject.text;
+    function initFromModel() {
+        textEdit.text = tileModelContent.text;
     }
 }
 

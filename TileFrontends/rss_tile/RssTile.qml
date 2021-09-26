@@ -161,6 +161,7 @@ TileContentBase {
                     text: rootTile.url
                     onEditingFinished: {
                         rootTile.url = urlTextField.text;
+                        saveToModel();
                     }
                     font.pixelSize: 12
                 }
@@ -188,17 +189,16 @@ TileContentBase {
             }
         }    
     }
-    
-    function serializeSession() {
-        // get content for the tile
-        return {
+
+    function saveToModel() {
+        tileModelContent = {
             "feed": rootTile.url,
             "refresh": rootTile.refresh_seconds
         };
     }
-    function deserializeSession(sessionObject) {
-        rootTile.url = sessionObject.feed;
-        rootTile.refresh_seconds = sessionObject.refresh;
+    function initFromModel() {
+        rootTile.url = tileModelContent.feed;
+        rootTile.refresh_seconds = tileModelContent.refresh;
     }
 }
 
