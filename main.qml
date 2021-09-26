@@ -55,20 +55,26 @@ Window {
         }
     }
 
-    Column {
-        z: 1
-        id: rootColumn
-        width: parent.width
-        spacing: 5
+    Flickable {
+        anchors.fill: parent
+        contentWidth: parent.width; contentHeight: rootColumn.height
+        flickableDirection: Flickable.VerticalFlick
 
-        Repeater {
-            model: rowsModel
-            delegate: RowOfColumns {
-                columnsModel: content
-                width: rootColumn.width
+        Column {
+            z: 1
+            id: rootColumn
+            width: parent.width
+            spacing: 5
 
-                onRemoveRow: {
-                    rowsModel.remove(index);
+            Repeater {
+                model: rowsModel
+                delegate: RowOfColumns {
+                    columnsModel: content
+                    width: rootColumn.width
+
+                    onRemoveRow: {
+                        rowsModel.remove(index);
+                    }
                 }
             }
         }
