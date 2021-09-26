@@ -26,15 +26,14 @@ import "../../TileManager"
 TileContentBase {
     id: root
 
-    width: 800
-    height: 480
+    height: contentItem.height
 
     property string place: "Paris,France"
 
     Item {
-        id: slideshow
-
-        anchors.fill: parent
+        id: contentItem
+        width: parent.width
+        height: infosGrid.height + 150 /* for the listview */
 
         Column {
             id: infosGrid
@@ -86,11 +85,9 @@ TileContentBase {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            anchors.bottomMargin: 20
+            anchors.margins: 20
 
-            clip: true;
+            clip: true
 
             model: weatherModel
             spacing: 10
@@ -128,24 +125,14 @@ TileContentBase {
             id: weatherModel
             place: root.place
         }
-
-        Text {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.bottomMargin: 5
-            anchors.rightMargin: 20
-            text: "OpenWeatherData"
-            font.pixelSize: 12
-            font.italic: true
-        }
     }
 
     function saveToModel() {
-        tileModelContent = {
+        commitContent({
             "place": root.place
-        };
+        });
     }
-    function initFromModel() {
+    function initFromModel(tileModelContent) {
         root.place = tileModelContent.place;
     }
 }

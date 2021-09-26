@@ -191,12 +191,12 @@ TileContentBase {
     }
 
     function saveToModel() {
-        tileModelContent = {
+        commitContent({
             "feed": rootTile.url,
             "refresh": rootTile.refresh_seconds
-        };
+        });
     }
-    function initFromModel() {
+    function initFromModel(tileModelContent) {
         rootTile.url = tileModelContent.feed;
         rootTile.refresh_seconds = tileModelContent.refresh;
     }

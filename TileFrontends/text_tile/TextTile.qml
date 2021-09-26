@@ -33,11 +33,11 @@ TileContentBase {
     }
 
     function saveToModel() {
-        tileModelContent = {
+        commitContent({
             "text": textEdit.text
-        };
+        });
     }
-    function initFromModel() {
+    function initFromModel(tileModelContent) {
         textEdit.text = tileModelContent.text;
     }
 }

@@ -6,6 +6,7 @@ QtObject {
     property color color: "transparent"
 
     property var contentModel
+    onContentModelChanged: console.log("changed! new value: " + JSON.stringify(contentModel));
 
     function serializeSession() {
         return {

@@ -97,13 +97,22 @@ Item {
             }
             anchors.margins: parent.border.width
             source: tileModel.source
+            onSourceChanged: tileModel.source = source
 
-            property var loaderTileModelContent: tileModel.contentModel
+            onLoaded: {
+                if(item && item.initFromModel && !!tileModel.contentModel) {
+                    item.initFromModel(tileModel.contentModel);
+                }
+            }
         }
         Connections {
             target: contentItemLoader.item
             function onSetupTitle(newTitle) {
                 rootItem.tileTitle = newTitle;
+                tileModel.title = newTitle;
+            }
+            function onCommitContent(newContent) {
+                tileModel.contentModel = newContent;
             }
         }
 
