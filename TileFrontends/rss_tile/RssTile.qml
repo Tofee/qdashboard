@@ -142,15 +142,29 @@ TileContentBase {
         anchors.fill:  parent
         spacing: 2
         model: jsonModel
-        header: TextField {
+        header: Rectangle {
             width: parent.width
-
-            id: urlTextField
-            text: rootTile.url
-            onEditingFinished: {
-                rootTile.url = urlTextField.text;
+            height: urlTextField.implicitHeight
+            border {
+                color: urlTextFieldFocusScope.activeFocus ? "blue" : "grey"
+                width: 2
             }
-            font.pixelSize: 12
+
+            FocusScope {
+                id: urlTextFieldFocusScope
+                anchors.fill: parent
+                TextInput {
+                    width: parent.width
+                    padding: 2
+
+                    id: urlTextField
+                    text: rootTile.url
+                    onEditingFinished: {
+                        rootTile.url = urlTextField.text;
+                    }
+                    font.pixelSize: 12
+                }
+            }
         }
 
         delegate: feedDelegate

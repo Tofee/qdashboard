@@ -19,7 +19,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Window 2.0
+import QtQuick.Layouts 1.12
 
 import "../../TileManager"
 
@@ -36,46 +36,45 @@ TileContentBase {
 
         anchors.fill: parent
 
-        Text {
-            id: clockText
+        Column {
+            id: infosGrid
+            width: parent.width
+            clip: true
 
-            anchors.left: dateText.left
-            anchors.baseline: temperatureText.baseline
-
-            text: {
-                var date = new Date()
-                return date.toLocaleTimeString(Qt.locale(), "hh:mm");
+            RowLayout {
+                width: parent.width
+                Text {
+                    id: placeText
+                    text: root.place
+                    font.pixelSize: 20
+                }
+                Text {
+                    id: dateText
+                    Layout.alignment: Qt.AlignRight
+                    text: {
+                        var date = new Date()
+                        return date.toLocaleDateString(Qt.locale(), "ddd dd MMM yyyy");
+                    }
+                    font.pixelSize: 20
+                }
             }
-
-            font.pixelSize: 80
-        }
-
-        Text {
-            id: dateText
-
-            anchors.left: parent.left
-            anchors.top: clockText.bottom
-            anchors.leftMargin: 20
-
-            text: {
-                var date = new Date()
-                return date.toLocaleDateString();
+            RowLayout {
+                width: parent.width
+                Text {
+                    id: clockText
+                    text: {
+                        var date = new Date()
+                        return date.toLocaleTimeString(Qt.locale(), "hh:mm");
+                    }
+                    font.pixelSize: 28
+                }
+                Text {
+                    id: temperatureText
+                    Layout.alignment: Qt.AlignRight
+                    text: weatherModel.currentTempC.toFixed(1) + "°C"
+                    font.pixelSize: 28
+                }
             }
-
-            font.pixelSize: 20
-        }
-
-        Text {
-            id: temperatureText
-
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.bottomMargin: 20
-            anchors.rightMargin: 20
-
-            text: weatherModel.currentTempC.toFixed(1) + "°C"
-
-            font.pixelSize: 80
         }
 
         ListView {
@@ -83,7 +82,7 @@ TileContentBase {
 
             orientation: ListView.Horizontal
 
-            anchors.top: dateText.bottom
+            anchors.top: infosGrid.bottom
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
@@ -103,7 +102,7 @@ TileContentBase {
                     font.bold: true
                     text: {
                         var date = new Date(epochDate)
-                        return date.toLocaleString(Qt.locale(), "dd/MM hh:mm");
+                        return date.toLocaleString(Qt.locale(), "ddd hh:mm");
                     }
                 }
                 Image {

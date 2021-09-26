@@ -27,7 +27,7 @@ Item {
     // background and border
     Rectangle {
         id: dragRect
-        color: "transparent"
+        color: tileModel.color
         border {
             color: "grey"
             width: 1
@@ -43,7 +43,7 @@ Item {
         // title + its background
         Rectangle {
             id: titleRect
-            color: "lightblue"
+            color: "#eaf0fa"
             height: tileTitleText.implicitHeight*1.1
             anchors
             {
@@ -55,8 +55,12 @@ Item {
 
             Text {
                 id: tileTitleText
-                anchors.centerIn: parent
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
                 text: tileModel.title
+                font.pixelSize: 12
+                font.bold: true
+                color: "darkblue"
             }
 
             MouseArea {
