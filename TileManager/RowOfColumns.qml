@@ -5,115 +5,82 @@ import QtQuick.Layouts 1.12
 import QtQml.Models 2.12
 import QtQuick.Controls 2.15
 
+import "Models"
+
 RowLayout {
     id: rowLayout
     spacing: 0
-    property ObjectModel listObjectColumns: ObjectModel {}
 
-    Component {
-        id: columnComponent
-        Item {
+    property RowOfColumnsModel columnsModel
+
+    signal removeRow();
+
+    Repeater {
+        model: columnsModel
+        delegate: Item {
             id: titleColumnWrapper
-            property real weight: 1.0 // by defautl, each column weights the same. Total weight is always listObjectColumns.count.
-            property Item wrappedColumn: titleColumn
+            readonly property real weight: content.weight
+            property TileColumnModel tileColumnModel: content
+
+            property int columnIndex: index
 
             Layout.preferredHeight: titleColumn.height
             Layout.alignment: Qt.AlignTop
             Layout.minimumWidth: 100
-            Layout.preferredWidth: rowLayout.width*(weight/listObjectColumns.count);
+            Layout.preferredWidth: rowLayout.width*(weight/columnsModel.count);
 
-            property real _minWeight: (Layout.minimumWidth/rowLayout.width)*listObjectColumns.count;
+            property real _minWeight: (Layout.minimumWidth/rowLayout.width)*columnsModel.count;
 
             TileColumn {
                 id: titleColumn
-                width: parent.width - colHandle.width
+                width: parent.width - colHandle.width - 2*3
                 anchors.left: parent.left
                 anchors.top: parent.top
 
-                onAddColumn: rowLayout.addColumn();
+                tileColumnModel: titleColumnWrapper.tileColumnModel
 
-                Component.onDestruction: {
-                    for(var i=0; i<listObjectColumns.count; ++i) {
-                        if(listObjectColumns.get(i) === this.parent) {
-                            listObjectColumns.remove(i);
-                            break;
-                        }
+                onAddColumn: columnsModel.addColumn();
+                onRemoveColumn: {
+                    if(columnsModel.count === 0) {
+                        rowLayout.removeRow();
                     }
-
-                    if(listObjectColumns.count === 0) {
-                        rowLayout.destroy();
+                    else {
+                        columnsModel.remove(titleColumnWrapper.columnIndex);
                     }
                 }
             }
             // handle
             Rectangle {
                 id: colHandle
+                visible: titleColumnWrapper.columnIndex+1 < columnsModel.count
                 anchors.left: titleColumn.right
                 anchors.top: parent.top
-                width: 4
-                height: titleColumn.height
-                color: "red"
+                anchors.leftMargin: 3
+                anchors.rightMargin: 3
+                width: 2
+
+                height: Math.min(titleColumn.height, 50)
+                color: "grey"
 
                 MouseArea {
                     anchors.fill: parent
+                    cursorShape: Qt.SplitHCursor
                     drag{ target: parent; axis: Drag.XAxis }
                     onMouseXChanged: {
                         if(drag.active) {
                             var newWidth = titleColumnWrapper.width + mouseX;
-                            var deltaWeight = newWidth*listObjectColumns.count/rowLayout.width - titleColumnWrapper.weight;
+                            var deltaWeight = newWidth*columnsModel.count/rowLayout.width - titleColumnWrapper.weight;
+                            var columnOnRight = columnsModel.get(titleColumnWrapper.columnIndex+1).content;
                             if (_minWeight < titleColumnWrapper.weight + deltaWeight &&
-                                _minWeight < listObjectColumns.get(titleColumnWrapper.ObjectModel.index+1).weight - deltaWeight)
+                                _minWeight < columnOnRight.weight - deltaWeight)
                             {
-                                titleColumnWrapper.weight += deltaWeight;
-                                listObjectColumns.get(titleColumnWrapper.ObjectModel.index+1).weight -= deltaWeight;
+                                titleColumnWrapper.tileColumnModel.weight += deltaWeight;
+                                columnOnRight.weight -= deltaWeight;
                             }
                         }
                     }
                 }
             }
-
-            function addTile() {
-                titleColumn.addTile();
-            }
-            function serializeSession() {
-                return titleColumn.serializeSession();
-            }
-            function deserializeSession(sessionObject) {
-                titleColumn.deserializeSession(sessionObject);
-            }
-        }
-    }
-
-    Repeater {
-        model: listObjectColumns
-    }
-
-    function addColumn()
-    {
-        var newColumn = columnComponent.createObject(listObjectColumns);
-        listObjectColumns.append(newColumn);
-
-        newColumn.addTile();
-    }
-
-    function serializeSession() {
-        // get content for each column in the splitview
-        var columnArray = new Array;
-        for (var i = 0; i < listObjectColumns.count; ++i) {
-            var column = listObjectColumns.get(i).serializeSession();
-            columnArray.push(column);
-        }
-
-        return {
-            "columns": columnArray
-        };
-    }
-    function deserializeSession(sessionObject) {
-        for(var i = 0; i < sessionObject.columns.length; ++i) {
-            var newColumn = columnComponent.createObject(listObjectColumns);
-            newColumn.deserializeSession(sessionObject.columns[i]);
-
-            listObjectColumns.append(newColumn);
         }
     }
 }

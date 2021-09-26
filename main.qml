@@ -5,6 +5,7 @@ import QtQml.Models 2.12
 import QtQuick.Controls 2.12
 
 import "TileManager"
+import "TileManager/Models"
 import "TileFrontends/text_tile"
 import "TileFrontends/rss_tile"
 
@@ -20,9 +21,14 @@ Window {
 
     Component.onCompleted: root.readFromServer();
 
-    Component {
-        id: rowComponent
-        RowOfColumns {}
+    Image {
+        anchors.fill: parent
+        source: "qrc:///TileManager/images/white-waves.png"
+        fillMode: Image.Tile
+    }
+
+    RowsModel {
+        id: rowsModel
     }
 
     MouseArea {
@@ -54,26 +60,37 @@ Window {
         id: rootColumn
         width: parent.width
         spacing: 5
+
+        Repeater {
+            model: rowsModel
+            delegate: RowOfColumns {
+                columnsModel: content
+                width: rootColumn.width
+
+                onRemoveRow: {
+                    rowsModel.remove(index);
+                }
+            }
+        }
     }
 
     function serializeSession() {
         // get Json content for each line in rootColumn
         var rowArray = new Array;
-        for (var i = 0; i < rootColumn.children.length; ++i) {
-            rowArray.push(rootColumn.children[i].serializeSession());
+        for (var i = 0; i < rowsModel.count; ++i) {
+            rowArray.push(rowsModel.get(i).content.serializeSession());
         }
 
         return {
             "timestamp": Date.now(),
-            "rows": rowArray
+            "tabs": [
+                { "rows": rowArray }
+            ]
         };
     }
 
     function deserializeSession(sessionObject) {
-        for(var i = 0; i < sessionObject.rows.length; ++i) {
-            var newRow = rowComponent.createObject(rootColumn, {width: Qt.binding(function() { return rootColumn.width; })});
-            newRow.deserializeSession(sessionObject.rows[i]);
-        }
+        rowsModel.deserializeSession(sessionObject.tabs[0]);
     }
 
     function save() {

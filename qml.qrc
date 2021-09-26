@@ -29,5 +29,10 @@
         <file>TileFrontends/weather_tile/images/weather/50n@2x.png</file>
         <file>TileManager/TileContentBase.qml</file>
         <file>TileManager/images/close.svg</file>
+        <file>TileManager/Models/RowOfColumnsModel.qml</file>
+        <file>TileManager/Models/TileColumnModel.qml</file>
+        <file>TileManager/Models/TileModel.qml</file>
+        <file>TileManager/Models/RowsModel.qml</file>
+        <file>TileManager/images/white-waves.png</file>
     </qresource>
 </RCC>

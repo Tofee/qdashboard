@@ -8,9 +8,9 @@ import "../../TileManager"
 TileContentBase {
     id: rootTile
 
-    height: 200;
+    height: Math.max(200, thefeed.height);
 
-    property string url: "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+    property string url
     property int refresh_seconds: 600;
     property int refresh: 1000 * 600
 
@@ -20,11 +20,13 @@ TileContentBase {
         var regex = /<\/?[^>]+(>|$)/gi;
         str = str.replace(regex, "");
         str = str.replace(/\n/gi, " ");
+        str = str.replace(/#[0-9]+;/gi, "");
         return str.substring(0, maxlen);
     }
     function stripImages (str) {
         var regex = /(<img.*?>)/gi;
         str = str.replace(regex, "");
+        str = str.replace(/#[0-9]+;/gi, "");
         return str;
     }
     
@@ -33,8 +35,10 @@ TileContentBase {
         Component.onCompleted: jsonModel.refresh()
 
         function refresh () {
+            if(url.length === 0) return;
+
             var xhr = new XMLHttpRequest;
-            console.log("URL: "+_getServiceURL(url));
+            //console.log("URL: "+_getServiceURL(url));
             xhr.open("GET", _getServiceURL(url));
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {

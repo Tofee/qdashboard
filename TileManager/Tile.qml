@@ -1,15 +1,19 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 
+import "Models"
+
 Item {
     id: rootItem
     height: dragRect.height;
     width: parent ? parent.width : 80;
 
+    property TileModel tileModel
+
+    signal close();
+
     property alias tileTitle: tileTitleText.text
     property alias backgroundColor: dragRect.color
-
-    default property alias contentItemSource: contentItemLoader.source
 
     // draw a frame:
     // _______________
@@ -23,7 +27,7 @@ Item {
     // background and border
     Rectangle {
         id: dragRect
-        color: "white"
+        color: "transparent"
         border {
             color: "grey"
             width: 1
@@ -31,7 +35,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         width: rootItem.width
-        height: titleRect.height + contentItemLoader.height
+        height: titleRect.height + contentItemLoader.height + 2*border.width
 
         // drag and drop
         property Item parentTile: rootItem;
@@ -52,7 +56,7 @@ Item {
             Text {
                 id: tileTitleText
                 anchors.centerIn: parent
-                text: "Title"
+                text: tileModel.title
             }
 
             MouseArea {
@@ -61,9 +65,6 @@ Item {
                 drag.target: dragRect
 
                 drag.onActiveChanged: {
-                    if (mouseArea.drag.active) {
-                     //   rootItem.dragItemIndex = rootItem.index;
-                    }
                     dragRect.Drag.drop();
                 }
             }
@@ -78,7 +79,7 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: icon.width
-                onClicked: rootItem.destroy();
+                onClicked: rootItem.close();
             }
         }
 
@@ -91,7 +92,9 @@ Item {
                 right: parent.right
             }
             anchors.margins: parent.border.width
-            source: "qrc:///TileManager/TileChooser.qml" // default source is a chooser
+            source: tileModel.source
+
+            property var tileModelContent: tileModel.contentModel
         }
         Connections {
             target: contentItemLoader.item
@@ -114,23 +117,5 @@ Item {
         Drag.active: mouseArea.drag.active
         Drag.hotSpot.x: dragRect.width / 2
         Drag.hotSpot.y: dragRect.height / 2
-    }
-
-    function serializeSession() {
-        // get content for the tile
-        var tileItem = contentItemLoader.item;
-        var tileContent = {};
-        if(tileItem && tileItem.serializeSession) tileContent = tileItem.serializeSession();
-
-        return {
-            "source": contentItemLoader.source,
-            "content": tileContent
-        };
-    }
-    function deserializeSession(sessionObject) {
-        contentItemLoader.source = sessionObject.source; // this will load the corresponding tile
-
-        if(contentItemLoader.item && contentItemLoader.item.deserializeSession)
-            contentItemLoader.item.deserializeSession(sessionObject.content);
     }
 }

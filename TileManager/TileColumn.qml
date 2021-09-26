@@ -3,37 +3,35 @@ import QtQml.Models 2.12
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.12
 
+import "Models"
+
 Item {
     id: colWrapper
     height: col.height
 
-    property ObjectModel listTiles: ObjectModel {}
+    property TileColumnModel tileColumnModel
 
+    signal removeColumn();
     signal addColumn()
-
-    Component {
-        id: tileComponent
-        Tile {
-            Component.onDestruction: {
-                for(var i=0; i<listTiles.count; ++i) {
-                    if(listTiles.get(i) === this) {
-                        listTiles.remove(i);
-                        break;
-                    }
-                }
-
-                if(listTiles.count === 0) {
-                    colWrapper.destroy();
-                }
-            }
-        }
-    }
 
     Column {
         id: col
         width: parent.width
         Repeater {
-            model: listTiles
+            model: tileColumnModel
+            delegate: Tile {
+                id: tileDelegate
+                tileModel: content
+
+                onClose: {
+                    if(tileColumnModel.count === 1) {
+                        colWrapper.removeColumn();
+                    }
+                    else {
+                        tileColumnModel.remove(index);
+                    }
+                }
+            }
         }
     }
 
@@ -47,13 +45,13 @@ Item {
             MenuItem {
                 text: "New tile"
                 onTriggered: {
-                    addTile();
+                    tileColumnModel.addTile();
                 }
             }
             MenuItem {
                 text: "New column"
                 onTriggered: {
-                    addColumn();
+                    colWrapper.addColumn();
                 }
             }
         }
@@ -62,38 +60,10 @@ Item {
     DropArea {
         anchors.fill: parent
         onDropped: {
-            listTiles.append(drag.source.parentTile);
+            var serializedTile = drag.source.parentTile.tileModel.serializeSession();
+            tileColumnModel.addTile(serializedTile);
+            drag.source.parentTile.close();
         }
-    }
-
-    function addTile() {
-        var newTile = tileComponent.createObject(listTiles);
-        listTiles.append(newTile);
-    }
-
-    function serializeSession() {
-        // get content for each line in tile column
-        var tileArray = new Array;
-        for (var i = 0; i < listTiles.count; ++i) {
-            var tile = listTiles.get(i).serializeSession();
-            tileArray.push(tile);
-        }
-
-        return {
-            "width": colWrapper.width,
-            "tiles": tileArray
-        };
-    }
-
-    function deserializeSession(sessionObject) {
-        for(var i = 0; i < sessionObject.tiles.length; ++i) {
-            var newTile = tileComponent.createObject(listTiles, { "contentItemSource": "" }); // skip the chooser
-            newTile.deserializeSession(sessionObject.tiles[i]);
-
-            listTiles.append(newTile);
-        }
-
-        colWrapper.implicitWidth = sessionObject.width;
     }
 }
 

@@ -6,7 +6,7 @@ import "../../TileManager"
 TileContentBase {
     id: rootItem
 
-    height: textEdit.implicitHeight
+    height: textEdit.paintedHeight
 
     onActiveFocusChanged: {
         var currentText = textEdit.text;

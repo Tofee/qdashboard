@@ -21,7 +21,9 @@
 import QtQuick 2.7
 import QtQuick.Window 2.0
 
-Item {
+import "../../TileManager"
+
+TileContentBase {
     id: root
 
     width: 800
