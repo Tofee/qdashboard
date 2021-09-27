@@ -34,5 +34,7 @@
         <file>TileManager/Models/TileModel.qml</file>
         <file>TileManager/Models/RowsModel.qml</file>
         <file>TileManager/images/white-waves.png</file>
+        <file>TileManager/Models/TabsModel.qml</file>
+        <file>TileManager/TabPage.qml</file>
     </qresource>
 </RCC>

@@ -7,6 +7,14 @@ ListModel {
         RowOfColumnsModel {}
     }
 
+    function addRow()
+    {
+        var newRow = _childTemplate.createObject(rowsModel);
+        rowsModel.append({"content": newRow});
+
+        newRow.addColumn();
+    }
+
     function serializeSession() {
         // get content for each row
         var rowArray = new Array;

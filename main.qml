@@ -9,7 +9,7 @@ import "TileManager/Models"
 import "TileFrontends/text_tile"
 import "TileFrontends/rss_tile"
 
-Window {
+ApplicationWindow {
     id: root
     width: 640
     height: 480
@@ -27,23 +27,32 @@ Window {
         fillMode: Image.Tile
     }
 
-    RowsModel {
-        id: rowsModel
+    TabsModel {
+        id: tabsModel
     }
 
+    header: TabBar {
+        id: tabBar
+
+        Repeater {
+            model: tabsModel
+            TabButton {
+                text: model.title
+            }
+        }
+
+    }
     MouseArea {
-        z: 0
-        anchors.fill: parent
+        anchors.fill: header
         acceptedButtons: Qt.RightButton
         onClicked: contextMenu.popup()
 
         Menu {
             id: contextMenu
             MenuItem {
-                text: "New row"
+                text: "Add tab"
                 onTriggered: {
-                    var newRow = rowComponent.createObject(rootColumn, {width: Qt.binding(function() { return rootColumn.width; })});
-                    newRow.addColumn();
+                    tabsModel.addTab();
                 }
             }
             MenuItem {
@@ -54,49 +63,34 @@ Window {
             }
         }
     }
+    StackLayout {
+        anchors.top: tabBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
-    Flickable {
-        anchors.fill: parent
-        contentWidth: parent.width; contentHeight: rootColumn.height
-        flickableDirection: Flickable.VerticalFlick
+        currentIndex: tabBar.currentIndex
 
-        Column {
-            z: 1
-            id: rootColumn
-            width: parent.width
-            spacing: 5
-
-            Repeater {
-                model: rowsModel
-                delegate: RowOfColumns {
-                    columnsModel: content
-                    width: rootColumn.width
-
-                    onRemoveRow: {
-                        rowsModel.remove(index);
-                    }
-                }
+        Repeater {
+            model: tabsModel
+            TabPage {
+                rowsModel: content
             }
         }
     }
 
     function serializeSession() {
-        // get Json content for each line in rootColumn
-        var rowArray = new Array;
-        for (var i = 0; i < rowsModel.count; ++i) {
-            rowArray.push(rowsModel.get(i).content.serializeSession());
-        }
+        // get Json content for the main model
+        var serializedSessionObj = tabsModel.serializeSession();
 
-        return {
-            "timestamp": Date.now(),
-            "tabs": [
-                { "rows": rowArray }
-            ]
-        };
+        // add a timestamp
+        serializedSessionObj.timestamp = Date.now();
+
+        return serializedSessionObj;
     }
 
     function deserializeSession(sessionObject) {
-        rowsModel.deserializeSession(sessionObject.tabs[0]);
+        tabsModel.deserializeSession(sessionObject);
     }
 
     function save() {
