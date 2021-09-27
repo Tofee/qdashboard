@@ -37,7 +37,29 @@ ApplicationWindow {
         Repeater {
             model: tabsModel
             TabButton {
+                id: tabButton
                 text: model.title
+                property int _index: model.index
+
+                onDoubleClicked: {
+                    tabButton.display = AbstractButton.IconOnly;
+                    tabTitleInput.visible = true;
+                    tabTitleInput.focus = true;
+                    tabTitleInput.selectAll()
+                }
+                TextInput {
+                    id: tabTitleInput
+                    anchors.fill: parent
+                    visible: false
+                    text: parent.text
+                    horizontalAlignment: Qt.AlignHCenter
+                    verticalAlignment: Qt.AlignCenter
+                    onEditingFinished: {
+                        tabsModel.get(tabButton._index).title = tabTitleInput.text
+                        tabTitleInput.visible = false;
+                        tabButton.display = AbstractButton.TextOnly
+                    }
+                }
             }
         }
 
