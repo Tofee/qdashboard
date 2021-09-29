@@ -36,5 +36,6 @@
         <file>TileManager/images/white-waves.png</file>
         <file>TileManager/Models/TabsModel.qml</file>
         <file>TileManager/TabPage.qml</file>
+        <file>TileFrontends/todo_tile/TodoTile.qml</file>
     </qresource>
 </RCC>

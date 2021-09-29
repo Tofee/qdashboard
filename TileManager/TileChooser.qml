@@ -34,5 +34,13 @@ TileContentBase {
                 rootTileChooser.parent.source = "qrc:///TileFrontends/weather_tile/WeatherTile.qml";
             }
         }
+        Button {
+            width: parent.width
+            text: "ToDo tile"
+            onClicked: {
+                // change the Loader's source
+                rootTileChooser.parent.source = "qrc:///TileFrontends/todo_tile/TodoTile.qml";
+            }
+        }
     }
 }
