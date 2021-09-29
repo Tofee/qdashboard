@@ -1,4 +1,7 @@
 QT += gui core quick
+wasm {
+    QTPLUGIN += qsvg
+}
 
 CONFIG += c++11
 
