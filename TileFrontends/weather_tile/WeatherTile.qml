@@ -29,6 +29,7 @@ TileContentBase {
     height: contentItem.height
 
     property string place: "Paris,France"
+    tileTitle: place
 
     Item {
         id: contentItem
@@ -104,7 +105,7 @@ TileContentBase {
                 }
                 Image {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    source: symbolSource
+                    source: "qrc:///TileFrontends/weather_tile/" + symbolSource
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter

@@ -7,6 +7,7 @@ TileContentBase {
     id: rootItem
 
     height: textEdit.paintedHeight
+    tileTitle: "Notepad"
 
     onActiveFocusChanged: {
         var currentText = textEdit.text;

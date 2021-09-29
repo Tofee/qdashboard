@@ -103,12 +103,14 @@ Item {
                 if(item && item.initFromModel && !!tileModel.contentModel) {
                     item.initFromModel(tileModel.contentModel);
                 }
+                if(item && !!item.tileTitle) {
+                    tileModel.title = item.tileTitle;
+                }
             }
         }
         Connections {
             target: contentItemLoader.item
             function onSetupTitle(newTitle) {
-                rootItem.tileTitle = newTitle;
                 tileModel.title = newTitle;
             }
             function onCommitContent(newContent) {
