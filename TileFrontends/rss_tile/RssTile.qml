@@ -49,7 +49,12 @@ TileContentBase {
                     if(rootObj.rss) {
                         // RSS feed
                         for (var i_item in rootObj.rss.channel.item) {
-                            jsonModel.append(rootObj.rss.channel.item[i_item]);
+                            var rssItem = rootObj.rss.channel.item[i_item];
+                            jsonModel.append({
+                                                 "title": rssItem.title,
+                                                 "description": rssItem.description,
+                                                 "pubDate": rssItem.pubDate
+                                             });
                         }
                         rootTile.setupTitle(rootObj.rss.channel.title);
                     }
@@ -60,7 +65,7 @@ TileContentBase {
                             jsonModel.append({
                                                  "title": atomEntry.title,
                                                  "description": atomEntry.content['#text'],
-                                                 "pubDate": atomEntry.published
+                                                 "pubDate": (atomEntry.published || "")
                                              });
                         }
                         rootTile.setupTitle(rootObj.feed.title);
