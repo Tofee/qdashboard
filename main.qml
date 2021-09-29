@@ -39,6 +39,7 @@ ApplicationWindow {
             TabButton {
                 id: tabButton
                 text: model.title
+                width: implicitWidth
                 property int _index: model.index
 
                 onDoubleClicked: {
@@ -85,18 +86,22 @@ ApplicationWindow {
             }
         }
     }
-    StackLayout {
+    SwipeView {
         anchors.top: tabBar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
+        interactive: false
         currentIndex: tabBar.currentIndex
 
         Repeater {
             model: tabsModel
-            TabPage {
-                rowsModel: content
+            Loader {
+                active: SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem
+                sourceComponent: TabPage {
+                    rowsModel: content
+                }
             }
         }
     }
