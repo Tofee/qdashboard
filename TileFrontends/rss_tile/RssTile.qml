@@ -53,7 +53,8 @@ TileContentBase {
                             jsonModel.append({
                                                  "title": rssItem.title,
                                                  "description": rssItem.description,
-                                                 "pubDate": rssItem.pubDate
+                                                 "pubDate": rssItem.pubDate,
+                                                 "link": rssItem.link
                                              });
                         }
                         rootTile.setupTitle(rootObj.rss.channel.title);
@@ -65,7 +66,8 @@ TileContentBase {
                             jsonModel.append({
                                                  "title": atomEntry.title,
                                                  "description": atomEntry.content['#text'],
-                                                 "pubDate": (atomEntry.published || "")
+                                                 "pubDate": (atomEntry.published || ""),
+                                                 "link": atomEntry.link['@href']
                                              });
                         }
                         rootTile.setupTitle(rootObj.feed.title);
