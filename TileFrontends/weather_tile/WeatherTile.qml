@@ -91,33 +91,43 @@ TileContentBase {
             clip: true
 
             model: weatherModel
-            spacing: 10
-            delegate: Column {
-                spacing: 2
-                Text {
+            spacing: 5
+            delegate: Rectangle {
+                color: "white"
+                width: weatherColumn.width + 4
+                height: weatherColumn.height
+                border.color: "lightgrey"
+                border.width: 1
+
+                Column {
+                    id: weatherColumn
                     anchors.horizontalCenter: parent.horizontalCenter
-                    font.pixelSize: 12
-                    font.bold: true
-                    text: {
-                        var date = new Date(epochDate)
-                        return date.toLocaleString(Qt.locale(), "ddd hh:mm");
+                    spacing: 2
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                        text: {
+                            var date = new Date(epochDate)
+                            return date.toLocaleString(Qt.locale(), "ddd hh:mm");
+                        }
                     }
-                }
-                Image {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:///TileFrontends/weather_tile/" + symbolSource
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    font.pixelSize: 12
-                    font.bold: true
-                    text: precipitation + "%"
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    font.pixelSize: 12
-                    font.bold: true
-                    text: temperature.toFixed(1) + "°C"
+                    Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        source: "qrc:///TileFrontends/weather_tile/" + symbolSource
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                        text: precipitation + "%"
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                        text: temperature.toFixed(1) + "°C"
+                    }
                 }
             }
         }
