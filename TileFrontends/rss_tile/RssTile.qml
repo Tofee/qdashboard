@@ -17,6 +17,7 @@ TileContentBase {
     onUrlChanged: jsonModel.refresh();
         
     function stripHtml (str, maxlen) {
+        if(!str) return "";
         var regex = /<\/?[^>]+(>|$)/gi;
         str = str.replace(regex, "");
         str = str.replace(/\n/gi, " ");
@@ -24,6 +25,7 @@ TileContentBase {
         return str.substring(0, maxlen);
     }
     function stripImages (str) {
+        if(!str) return "";
         var regex = /(<img.*?>)/gi;
         str = str.replace(regex, "");
         str = str.replace(/#[0-9]+;/gi, "");
@@ -52,7 +54,7 @@ TileContentBase {
                             var rssItem = rootObj.rss.channel.item[i_item];
                             jsonModel.append({
                                                  "title": rssItem.title,
-                                                 "description": rssItem.description,
+                                                 "description": (rssItem.description || ""),
                                                  "pubDate": rssItem.pubDate,
                                                  "link": rssItem.link
                                              });
@@ -65,7 +67,7 @@ TileContentBase {
                             var atomEntry = rootObj.feed.entry[i_entry];
                             jsonModel.append({
                                                  "title": atomEntry.title,
-                                                 "description": atomEntry.content['#text'],
+                                                 "description": (atomEntry.content['#text'] || ""),
                                                  "pubDate": (atomEntry.published || ""),
                                                  "link": atomEntry.link['@href']
                                              });
