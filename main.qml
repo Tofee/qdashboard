@@ -39,30 +39,48 @@ ApplicationWindow {
             TabButton {
                 id: tabButton
                 text: model.title
-                width: Math.max(implicitWidth, tabTitleInput.implicitWidth)
-                height: tabTitleInput.implicitHeight
+                width: contentItem.implicitWidth + contentItem.leftPadding + contentItem.rightPadding
+                height: contentItem.implicitHeight + contentItem.topPadding + contentItem.bottomPadding
+
+                topPadding: 2
+                bottomPadding: 2
+                leftPadding: 4
+                rightPadding: 4
+
+                background: Rectangle {
+                    color: tabButton.isTabActive ? "#eaf0fa" : "#efefef"
+                }
 
                 Component.onCompleted: tabBar.contentHeight = height
 
-                property int _index: model.index
+                property bool isTabActive: tabBar.currentIndex === tabButton.TabBar.index
 
-                onDoubleClicked: {
-                    tabButton.display = AbstractButton.IconOnly;
-                    tabTitleInput.visible = true;
-                    tabTitleInput.focus = true;
-                    tabTitleInput.selectAll()
-                }
-                TextInput {
+                contentItem: TextInput {
                     id: tabTitleInput
-                    anchors.fill: parent
-                    visible: false
-                    text: parent.text
+
+                    topPadding: 2
+                    bottomPadding: 2
+                    leftPadding: 4
+                    rightPadding: 4
+
+                    text: tabButton.text
+                    font.bold: true
+                   // font.pixelSize: 12
+                    color: tabButton.isTabActive ? "darkblue" : "grey"
+                    activeFocusOnPress: tabButton.isTabActive
                     horizontalAlignment: Qt.AlignHCenter
-                    verticalAlignment: Qt.AlignCenter
+                    verticalAlignment: Qt.AlignVCenter
                     onEditingFinished: {
-                        tabsModel.get(tabButton._index).title = tabTitleInput.text
-                        tabTitleInput.visible = false;
-                        tabButton.display = AbstractButton.TextOnly
+                        tabsModel.get(tabButton.TabBar.index).title = tabTitleInput.text
+                        tabTitleInput.focus = false;
+                    }
+                    onActiveFocusChanged: {
+                        if(activeFocus) tabTitleInput.selectAll();
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: !tabButton.isTabActive
+                        onClicked: tabBar.currentIndex = tabButton.TabBar.index
                     }
                 }
             }
