@@ -71,6 +71,7 @@ Item {
                 Button {
                     padding: 0
                     display: AbstractButton.TextOnly
+                    background: Item {}
                     Layout.preferredHeight: parent.height
                     Layout.preferredWidth: parent.height
                     rotation: rootItem.expanded ? 0 : -90
@@ -88,7 +89,19 @@ Item {
                     color: "darkblue"
                 }
                 Button {
+                    visible: (!!contentItemLoader.item && !!contentItemLoader.item.optionsDialog)
                     padding: 0
+                    background: Item {}
+                    icon.source: "qrc:///TileManager/images/options.svg"
+                    icon.height: parent.height
+                    icon.width: parent.height
+                    Layout.preferredHeight: parent.height
+                    Layout.preferredWidth: height
+                    onClicked: contentItemLoader.item.optionsDialog.open();
+                }
+                Button {
+                    padding: 0
+                    background: Item {}
                     icon.source: "qrc:///TileManager/images/close.svg"
                     icon.color: "transparent"
                     icon.height: parent.height

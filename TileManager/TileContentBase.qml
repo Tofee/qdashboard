@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.7
+import QtQuick.Controls 2.12
 
 FocusScope {
     id: rootTile
@@ -6,6 +7,8 @@ FocusScope {
     height: 100;
     property string tileTitle;
     onTileTitleChanged: setupTitle(tileTitle);
+
+    property Dialog optionsDialog;
 
     signal setupTitle(string newTitle);
     signal commitContent(var newContent);

@@ -9,6 +9,9 @@ ListModel {
     property real currentTempC
     property real rain_max: 10.0   // sensible default value, so that 0.25mm doesn't appear as a huge rain quantity
 
+    Component.onCompleted: reload();
+    onPlaceChanged: reload();
+
     property Timer refreshTimer: Timer {
         interval: 3600000 * weatherModel.refreshHour
         running: true
@@ -26,8 +29,6 @@ ListModel {
             weatherModel.reload();
         }
     }
-
-    Component.onCompleted: reload();
 
     function reload() {
         weatherModel.clear();

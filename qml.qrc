@@ -37,5 +37,8 @@
         <file>TileFrontends/weather_tile/images/weather/13n.png</file>
         <file>TileFrontends/weather_tile/images/weather/50d.png</file>
         <file>TileFrontends/weather_tile/images/weather/50n.png</file>
+        <file>TileManager/images/options.svg</file>
+        <file>TileManager/PaletteCheckBox.qml</file>
+        <file>TileManager/PaletteChooser.qml</file>
     </qresource>
 </RCC>
