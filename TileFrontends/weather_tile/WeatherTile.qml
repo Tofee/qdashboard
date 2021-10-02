@@ -91,22 +91,31 @@ TileContentBase {
             clip: true
 
             model: weatherModel
-            spacing: 5
+            spacing: 2
             delegate: Rectangle {
-                color: "white"
+                color: daylight ? Qt.rgba(1,1,1,0.5) : Qt.rgba(0.2,0.2,0.2,0.5)
                 width: weatherColumn.width + 4
                 height: weatherColumn.height
                 border.color: "lightgrey"
                 border.width: 1
 
+                Rectangle {
+                    width: parent.width
+                    anchors.bottom: parent.bottom
+                    color: "lightblue"
+
+                    height: parent.height * rain_3h / weatherModel.rain_max
+                }
+
                 Column {
                     id: weatherColumn
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 2
+                    spacing: 0
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pixelSize: 12
                         font.bold: true
+                        color: daylight ? "black": "white"
                         text: {
                             var date = new Date(epochDate)
                             return date.toLocaleString(Qt.locale(), "ddd hh:mm");
@@ -120,12 +129,14 @@ TileContentBase {
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pixelSize: 12
                         font.bold: true
-                        text: precipitation + "%"
+                        color: daylight ? "black": "white"
+                        text: rain_3h + "mm"
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pixelSize: 12
                         font.bold: true
+                        color: daylight ? "black": "white"
                         text: temperature.toFixed(1) + "°C"
                     }
                 }
