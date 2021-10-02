@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 import "Models"
 
@@ -14,6 +15,7 @@ Item {
 
     property alias tileTitle: tileTitleText.text
     property alias backgroundColor: dragRect.color
+    property bool expanded: true
 
     // draw a frame:
     // _______________
@@ -35,7 +37,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         width: rootItem.width
-        height: titleRect.height + contentItemLoader.height + 2*border.width
+        height: titleRect.height + (contentItemLoader.visible ? contentItemLoader.height : 0) + 2*border.width
 
         // drag and drop
         property Item parentTile: rootItem;
@@ -53,16 +55,6 @@ Item {
             }
             anchors.margins: parent.border.width
 
-            Text {
-                id: tileTitleText
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: tileModel.title
-                font.pixelSize: 12
-                font.bold: true
-                color: "darkblue"
-            }
-
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -73,22 +65,44 @@ Item {
                 }
             }
 
-            Button {
-                padding: 0
-                icon.source: "qrc:///TileManager/images/close.svg"
-                icon.color: "transparent"
-                icon.height: titleRect.height
-                icon.width: titleRect.height
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                width: icon.width
-                onClicked: rootItem.close();
+            RowLayout {
+                anchors.fill: parent
+                spacing: 5
+                Button {
+                    padding: 0
+                    display: AbstractButton.TextOnly
+                    Layout.preferredHeight: parent.height
+                    Layout.preferredWidth: parent.height
+                    rotation: rootItem.expanded ? 0 : -90
+                    Behavior on rotation { NumberAnimation { duration: 100 } }
+                    text: "▼"
+                    onClicked: rootItem.expanded = !rootItem.expanded
+                }
+                Text {
+                    id: tileTitleText
+                    Layout.fillWidth: true
+                    text: tileModel.title
+                    font.pixelSize: 12
+                    font.bold: true
+                    elide: Text.ElideRight
+                    color: "darkblue"
+                }
+                Button {
+                    padding: 0
+                    icon.source: "qrc:///TileManager/images/close.svg"
+                    icon.color: "transparent"
+                    icon.height: parent.height
+                    icon.width: parent.height
+                    Layout.preferredHeight: parent.height
+                    Layout.preferredWidth: height
+                    onClicked: rootItem.close();
+                }
             }
         }
 
         Loader {
             id: contentItemLoader
+            visible: rootItem.expanded
             anchors
             {
                 top: titleRect.bottom
