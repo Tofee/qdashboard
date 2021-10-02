@@ -39,7 +39,11 @@ ApplicationWindow {
             TabButton {
                 id: tabButton
                 text: model.title
-                width: implicitWidth
+                width: Math.max(implicitWidth, tabTitleInput.implicitWidth)
+                height: tabTitleInput.implicitHeight
+
+                Component.onCompleted: tabBar.contentHeight = height
+
                 property int _index: model.index
 
                 onDoubleClicked: {
@@ -140,7 +144,7 @@ ApplicationWindow {
         xhr.open("GET", serviceUrl);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                console.log("response: "+xhr.responseText);
+                //console.log("response: "+xhr.responseText);
                 var rootObj = JSON.parse(xhr.responseText);
 
                 if(rootObj) deserializeSession(rootObj);
