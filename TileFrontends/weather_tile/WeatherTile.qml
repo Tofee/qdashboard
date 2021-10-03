@@ -134,6 +134,7 @@ TileContentBase {
         id: dialog
         title: "Options"
         modal: true
+        anchors.centerIn: Overlay.overlay
         standardButtons: Dialog.Ok | Dialog.Cancel
 
         GridLayout {
