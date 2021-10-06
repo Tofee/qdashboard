@@ -12,30 +12,64 @@ TileContentBase {
     property alias text: textEdit.text
     property color backgroundColor: "transparent"
 
-    onActiveFocusChanged: {
-        var currentText = rootItem.text;
-        textEdit.textFormat = rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText;
-        rootItem.text = "";
-        rootItem.text = currentText;
-    }
-
     Rectangle {
+        id: backgroundRect
         anchors.fill:  parent
-        color: rootItem.activeFocus ? "lightBlue" : rootItem.backgroundColor
+        color: textEdit.activeFocus ? "lightBlue" : rootItem.backgroundColor
         opacity: 0.6
     }
 
     TextEdit {
+        id: spuriousTextEdit
+        width: 0
+        height: 0
+    }
+    TextEdit {
         id: textEdit
         width: parent.width
 
+        activeFocusOnPress: false
+        selectByMouse: true
         text: ""
         font.pointSize: 10
-        textFormat: rootItem.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText
+        textFormat: TextEdit.MarkdownText
         wrapMode: Text.WordWrap
+
+        onActiveFocusChanged: {
+            console.log("activeFocus="+activeFocus);
+            var currentText = rootItem.text;
+            textEdit.textFormat = textEdit.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText;
+            rootItem.text = "";
+            rootItem.text = currentText;
+        }
 
         onEditingFinished: {
             saveToModel()
+        }
+        onLinkActivated: {
+            if(!activeFocus) Qt.openUrlExternally(link)
+        }
+    }
+    ToolButton {
+        anchors.top: textEdit.top
+        anchors.right: textEdit.right
+        text: textEdit.activeFocus?"Save":"Edit"
+        focusPolicy: Qt.NoFocus
+        padding: 0
+        background: Rectangle {
+            border.color: "gray"
+            border.width: 1
+            color : textEdit.activeFocus?"orange":"lightblue"
+            opacity: 0.6
+        }
+
+        onClicked: {
+            if(!textEdit.activeFocus) {
+                textEdit.forceActiveFocus();
+            }
+            else {
+                forceActiveFocus()
+            }
         }
     }
 
