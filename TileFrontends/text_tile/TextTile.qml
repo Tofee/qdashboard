@@ -15,60 +15,57 @@ TileContentBase {
     Rectangle {
         id: backgroundRect
         anchors.fill:  parent
-        color: textEdit.activeFocus ? "lightBlue" : rootItem.backgroundColor
+        color: textEdit.readOnly ? rootItem.backgroundColor : "lightBlue"
         opacity: 0.6
     }
 
     TextEdit {
-        id: spuriousTextEdit
-        width: 0
-        height: 0
-    }
-    TextEdit {
         id: textEdit
         width: parent.width
 
-        activeFocusOnPress: false
+        activeFocusOnPress: true
         selectByMouse: true
         text: ""
         font.pointSize: 10
         textFormat: TextEdit.MarkdownText
         wrapMode: Text.WordWrap
+        readOnly: true
 
-        onActiveFocusChanged: {
-            console.log("activeFocus="+activeFocus);
-            var currentText = rootItem.text;
-            textEdit.textFormat = textEdit.activeFocus ? TextEdit.PlainText : TextEdit.MarkdownText;
-            rootItem.text = "";
-            rootItem.text = currentText;
+        onReadOnlyChanged: {
+            // remove markdown links
+            var markdownLinksToText = /\[[^\]]+\]\(([^\)]+)\)/gi
+            var markdownAsText = textEdit.text.replace(markdownLinksToText, "$1");
+            textEdit.clear();
+            textEdit.text = markdownAsText;
         }
 
         onEditingFinished: {
             saveToModel()
         }
         onLinkActivated: {
-            if(!activeFocus) Qt.openUrlExternally(link)
+            if(readOnly) Qt.openUrlExternally(link)
         }
     }
     ToolButton {
         anchors.top: textEdit.top
         anchors.right: textEdit.right
-        text: textEdit.activeFocus?"Save":"Edit"
+        text: textEdit.readOnly?"Edit":"Save"
         focusPolicy: Qt.NoFocus
         padding: 0
         background: Rectangle {
             border.color: "gray"
             border.width: 1
-            color : textEdit.activeFocus?"orange":"lightblue"
+            color : textEdit.readOnly?"lightblue":"orange"
             opacity: 0.6
         }
 
         onClicked: {
-            if(!textEdit.activeFocus) {
+            textEdit.readOnly = !textEdit.readOnly;
+            if(!textEdit.readOnly) {
                 textEdit.forceActiveFocus();
             }
             else {
-                forceActiveFocus()
+                forceActiveFocus();
             }
         }
     }
