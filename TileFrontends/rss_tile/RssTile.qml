@@ -11,8 +11,9 @@ TileContentBase {
     height: Math.max(200, thefeed.height);
 
     property string url
-    property int refresh_seconds: 600;
+    property int refresh_seconds: 600
     property int refresh: 1000 * 600
+    property date lastReadItemDate: new Date(0)
 
     onUrlChanged: jsonModel.refresh();
         
@@ -44,15 +45,14 @@ TileContentBase {
             xhr.open("GET", _getServiceURL(url));
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
-                    jsonModel.clear();
-
                     var rootObj = JSON.parse(xhr.responseText);
+                    var unsortedArray = new Array;
 
                     if(rootObj.rss) {
                         // RSS feed
                         for (var i_item in rootObj.rss.channel.item) {
                             var rssItem = rootObj.rss.channel.item[i_item];
-                            jsonModel.append({
+                            unsortedArray.push({
                                                  "title": rssItem.title,
                                                  "description": (rssItem.description || ""),
                                                  "pubDate": rssItem.pubDate,
@@ -65,7 +65,7 @@ TileContentBase {
                         // Atom feed
                         for (var i_entry in rootObj.feed.entry) {
                             var atomEntry = rootObj.feed.entry[i_entry];
-                            jsonModel.append({
+                            unsortedArray.push({
                                                  "title": atomEntry.title,
                                                  "description": (atomEntry.content['#text'] || ""),
                                                  "pubDate": (atomEntry.published || ""),
@@ -73,6 +73,19 @@ TileContentBase {
                                              });
                         }
                         rootTile.setupTitle(rootObj.feed.title);
+                    }
+
+                    // sort the array by pubDate
+                    unsortedArray.sort(function(a,b) {
+                        var dateA = new Date(a.pubDate);
+                        var dateB = new Date(b.pubDate);
+                        return (dateA<dateB) ? 1 : -1;
+                    });
+
+                    // now fill the model
+                    jsonModel.clear();
+                    for (var i in unsortedArray) {
+                        jsonModel.append(unsortedArray[i]);
                     }
                 }
             }
@@ -98,15 +111,15 @@ TileContentBase {
                 Text {
                     id: titleText
                     Layout.fillWidth: true
-                    font.weight: Font.Bold
-                    font.pixelSize: 12
+                    font.weight: (!lastReadItemDate || new Date(pubDate) > lastReadItemDate) ? Font.Bold : Font.Light
+                    font.pixelSize: 11
                     text: title
                     elide: Text.ElideRight
                 }
                 Text {
                     visible: Layout.preferredWidth>0
                     Layout.preferredWidth: parent.width - layout.spacing*2 - titleText.implicitWidth - dateText.implicitWidth
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                     font.weight: Font.Light
                     elide: Text.ElideRight
                     text: stripHtml(description, 100)
@@ -130,6 +143,7 @@ TileContentBase {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
                 hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     if (mouse.button == Qt.LeftButton)
                     {
@@ -151,34 +165,10 @@ TileContentBase {
         anchors.fill:  parent
         spacing: 2
         model: jsonModel
-        header: Rectangle {
-            width: parent.width
-            height: urlTextField.implicitHeight
-            border {
-                color: urlTextFieldFocusScope.activeFocus ? "blue" : "grey"
-                width: 2
-            }
-
-            FocusScope {
-                id: urlTextFieldFocusScope
-                anchors.fill: parent
-                TextInput {
-                    width: parent.width
-                    padding: 2
-
-                    id: urlTextField
-                    text: rootTile.url
-                    onEditingFinished: {
-                        rootTile.url = urlTextField.text;
-                        saveToModel();
-                    }
-                    font.pixelSize: 12
-                }
-            }
-        }
-
         delegate: feedDelegate
         snapMode: ListView.SnapToItem
+
+        ScrollBar.vertical: ScrollBar { }
     }
     
     Timer {        
@@ -197,16 +187,59 @@ TileContentBase {
                 jsonModel.refresh()
             }
         }    
+        MenuItem {
+            text: "Mark all as read"
+            onTriggered: {
+                lastReadItemDate = new Date();
+                saveToModel();
+            }
+        }
+    }
+
+    optionsDialog: Dialog {
+        id: dialog
+        title: "Options"
+        modal: true
+        anchors.centerIn: Overlay.overlay
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        contentWidth: 300
+
+        contentItem: GridLayout {
+            columns: 2
+
+            Label {
+                text: "RSS/Atom URL: "
+                font.bold: true
+                font.pixelSize: 12
+            }
+            TextInput {
+                id: optionRssUrl
+                text: rootTile.url
+                selectByMouse: true
+                font.pixelSize: 12
+
+                Layout.fillWidth: true
+            }
+        }
+
+        onAboutToShow: optionRssUrl.text = rootTile.url
+        onAccepted: {
+            rootTile.url = urlTextField.text;
+            saveToModel();
+        }
     }
 
     function saveToModel() {
         commitContent({
             "feed": rootTile.url,
+            "lastReadItemDate": lastReadItemDate,
             "refresh": rootTile.refresh_seconds
         });
     }
     function initFromModel(tileModelContent) {
         rootTile.url = tileModelContent.feed;
+        rootTile.lastReadItemDate = tileModelContent.lastReadItemDate || new Date(0);
         rootTile.refresh_seconds = tileModelContent.refresh;
     }
 }
