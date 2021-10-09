@@ -3,8 +3,20 @@ import QtQuick 2.12
 ListModel {
     id: tabsModel
 
+    signal commitTileChange(int tileIndex, int colIndex, int rowIndex, int tabIndex, var tileContent);
+
     property Component _childTemplate: Component {
-        RowsModel {}
+        RowsModel {
+            onCommitTileChange: {
+                for (var i = 0; i < tabsModel.count; ++i) {
+                    var tabPage = tabsModel.get(i).content;
+                    if(tabPage === this) {
+                        tabsModel.commitTileChange(tileIndex, colIndex, rowIndex, i, tileContent);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     function addTab()

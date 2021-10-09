@@ -7,6 +7,8 @@ QtObject {
 
     property var contentModel
 
+    signal commitChange();
+
     function serializeSession() {
         return {
             "source": source,

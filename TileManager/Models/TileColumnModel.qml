@@ -5,8 +5,21 @@ ListModel {
 
     property real weight: 1.0 // by defautl, each column weights the same. Total weight is always listObjectColumns.count.
 
+    signal commitTileChange(int tileIndex, var tileContent);
+
     property Component _childTemplate: Component {
-        TileModel {}
+        TileModel {
+            id: tileModel
+            onCommitChange: {
+                for (var i = 0; i < tileColumnModel.count; ++i) {
+                    var tile = tileColumnModel.get(i).content;
+                    if(tile === this) {
+                        tileColumnModel.commitTileChange(i, tileModel.serializeSession());
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     function addTile(serializedTile) {

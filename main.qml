@@ -29,6 +29,11 @@ ApplicationWindow {
 
     TabsModel {
         id: tabsModel
+
+        onCommitTileChange: {
+            // send an update message to the server
+            root.updateTile(tileIndex, colIndex, rowIndex, tabIndex, tileContent);
+        }
     }
 
     header: TabBar {
@@ -140,6 +145,20 @@ ApplicationWindow {
 
     function deserializeSession(sessionObject) {
         tabsModel.deserializeSession(sessionObject);
+    }
+
+    function updateTile(tileIndex, colIndex, rowIndex, tabIndex, tileContent) {
+        // send an update message to the server
+        var contentJsonStr = JSON.stringify(tileContent);
+        console.log("Updating tile: tab="+tabIndex+"/row="+rowIndex+"/col="+colIndex+"/tile="+tileIndex);
+        console.log("Content JSON: " + contentJsonStr);
+
+        // call server to save content
+        var xhr = new XMLHttpRequest;
+        var serviceUrl = serverBaseURI + "/session/update/"+tabIndex+"/"+rowIndex+"/"+colIndex+"/"+tileIndex;
+        xhr.open("PUT", serviceUrl);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(contentJsonStr);
     }
 
     function save() {

@@ -3,8 +3,20 @@ import QtQuick 2.12
 ListModel {
     id: rowsModel
 
+    signal commitTileChange(int tileIndex, int colIndex, int rowIndex, var tileContent);
+
     property Component _childTemplate: Component {
-        RowOfColumnsModel {}
+        RowOfColumnsModel {
+            onCommitTileChange: {
+                for (var i = 0; i < rowsModel.count; ++i) {
+                    var row = rowsModel.get(i).content;
+                    if(row === this) {
+                        rowsModel.commitTileChange(tileIndex, colIndex, i, tileContent);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     function addRow()

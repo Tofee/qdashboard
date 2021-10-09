@@ -142,6 +142,7 @@ Item {
             }
             function onCommitContent(newContent) {
                 tileModel.contentModel = newContent;
+                tileModel.commitChange();
             }
         }
 
