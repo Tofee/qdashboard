@@ -21,19 +21,37 @@ TileContentBase {
         Component {
             id: todoItemComp
 
-            CheckDelegate {
+            RowLayout {
                 id: todoItem
 
                 width: todoListColumn.width
 
                 property int _index: index
 
-                text: title
-                checkState: completed ? Qt.Checked : Qt.Unchecked
-                onCheckStateChanged: {
-                    todoModel.setProperty(_index, "completed", (checkState===Qt.Checked));
+                CheckBox {
+                    padding: 0
+                    font.pixelSize: 12
+                    text: title
 
-                    saveToModel();
+                    Layout.fillWidth: true
+
+                    checkState: completed ? Qt.Checked : Qt.Unchecked
+                    onCheckStateChanged: {
+                        todoModel.setProperty(_index, "completed", (checkState===Qt.Checked));
+
+                        saveToModel();
+                    }
+                }
+                RoundButton {
+                    radius: 10
+                    Layout.preferredHeight: 20
+                    Layout.preferredWidth: 20
+                    padding: 2
+                    font.pixelSize: 12
+                    text: "X"
+                    hoverEnabled: true
+                    palette.button: hovered ? "tomato" : "lightgrey"
+                    onClicked: todoModel.remove(_index);
                 }
             }
         }
