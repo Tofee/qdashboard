@@ -14,27 +14,6 @@ Item {
     signal removeColumn();
     signal addColumn()
 
-    Column {
-        id: col
-        width: parent.width
-        Repeater {
-            model: tileColumnModel
-            delegate: Tile {
-                id: tileDelegate
-                tileModel: content
-
-                onClose: {
-                    if(tileColumnModel.count === 1) {
-                        colWrapper.removeColumn();
-                    }
-                    else {
-                        tileColumnModel.remove(index);
-                    }
-                }
-            }
-        }
-    }
-
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
@@ -52,6 +31,27 @@ Item {
                 text: "New column"
                 onTriggered: {
                     colWrapper.addColumn();
+                }
+            }
+        }
+    }
+
+    Column {
+        id: col
+        width: parent.width
+        Repeater {
+            model: tileColumnModel
+            delegate: Tile {
+                id: tileDelegate
+                tileModel: content
+
+                onClose: {
+                    if(tileColumnModel.count === 1) {
+                        colWrapper.removeColumn();
+                    }
+                    else {
+                        tileColumnModel.remove(index);
+                    }
                 }
             }
         }
