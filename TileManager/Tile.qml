@@ -14,12 +14,13 @@ Item {
     signal close();
 
     property alias tileTitle: tileTitleText.text
+    property alias tileIcon: titleTileIcon.source
     property alias backgroundColor: dragRect.color
     property bool expanded: true
 
     // draw a frame:
     // _______________
-    // |    title   X|
+    // |I|  title   X|
     // - - - - - - - -
     // |             |
     // |   WIDGET    |
@@ -78,6 +79,13 @@ Item {
                     Behavior on rotation { NumberAnimation { duration: 100 } }
                     text: "▼"
                     onClicked: rootItem.expanded = !rootItem.expanded
+                }
+                Image {
+                    id: titleTileIcon
+                    visible: !!source
+                    fillMode: Image.PreserveAspectFit
+                    Layout.preferredHeight: parent.height-4
+                    Layout.preferredWidth: parent.height
                 }
                 Text {
                     id: tileTitleText
@@ -139,6 +147,9 @@ Item {
             target: contentItemLoader.item
             function onSetupTitle(newTitle) {
                 tileModel.title = newTitle;
+            }
+            function onSetupIcon(iconUrl) {
+                rootItem.tileIcon = iconUrl;
             }
             function onCommitContent(newContent) {
                 tileModel.contentModel = newContent;

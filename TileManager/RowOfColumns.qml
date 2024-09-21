@@ -33,7 +33,7 @@ RowLayout {
 
             TileColumn {
                 id: titleColumn
-                width: parent.width - colHandle.width - 2*3
+                width: parent.width - colHandle.width - 2*colHandle.anchors.leftMargin
                 anchors.left: parent.left
                 anchors.top: parent.top
 
@@ -55,8 +55,7 @@ RowLayout {
                 visible: titleColumnWrapper.columnIndex+1 < columnsModel.count
                 anchors.left: titleColumn.right
                 anchors.top: parent.top
-                anchors.leftMargin: 3
-                anchors.rightMargin: 3
+                anchors.leftMargin: visible ? 6 : 0
                 width: 2
 
                 height: Math.min(titleColumn.height, 50)

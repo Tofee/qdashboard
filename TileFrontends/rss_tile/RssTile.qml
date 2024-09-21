@@ -40,6 +40,10 @@ TileContentBase {
         function refresh () {
             if(url.length === 0) return;
 
+            var matches = url.match(/^https?\:\/\/([^\/:?#]+)(?:[\/:?#]|$)/i);
+            var servername = matches && matches[1];
+            if (!!servername) setupIcon(serverBaseURI+"/rss_tile/favicon/"+servername);
+
             var xhr = new XMLHttpRequest;
             //console.log("URL: "+_getServiceURL(url));
             xhr.open("GET", _getServiceURL(url));
@@ -182,18 +186,18 @@ TileContentBase {
     Menu {
         id: contextMenu
         MenuItem {
-            text: "Reload"
-            onTriggered: {
-                jsonModel.refresh()
-            }
-        }    
-        MenuItem {
             text: "Mark all as read"
             onTriggered: {
                 lastReadItemDate = new Date();
                 saveToModel();
             }
         }
+        MenuItem {
+            text: "Reload"
+            onTriggered: {
+                jsonModel.refresh()
+            }
+        }    
     }
 
     optionsDialog: Dialog {

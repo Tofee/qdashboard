@@ -10,6 +10,7 @@ FocusScope {
 
     property Dialog optionsDialog;
 
+    signal setupIcon(string iconUrl);
     signal setupTitle(string newTitle);
     signal commitContent(var newContent);
 }
