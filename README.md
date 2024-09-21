@@ -3,17 +3,18 @@ QDashboard
 
 Simple dashboard to visualize content in tiles.
 
-Configuration in Qt Creator
----------------------------
+Build and Run
+-------------
 
 In other to fully work, QDashboard need a server-side companion, provided by the qdashboard-server repository.
 
-After running it on "my-server" server, the following defines need to be added to the project:
+In order to be able to retrieve weather data, a weather_api_key.cmake must be created beside the CMakeLists.txt file, with the following content (replace the dummy key with your own OpenWeather API key here):
 ```
-DEFINES+=QDASHBOARD_SERVER_BASE_URI=\\\\\\\"https://my-server/qdashboard/api\\\\\\\" DEFINES+=OPENWEATHER_API_KEY=0123456789abcdef
+set (OPENWEATHER_API_KEY 0123456789abcdef)
 ```
-(yes, the escaping of the URI is a bit crazy here, but I didn't find any nicer way)
 
-Where:
-* QDASHBOARD_SERVER_BASE_URI points to the api resources for qdashboard-server
-* OPENWEATHER_API_KEY contains your API key for weather access
+Building to WebAssembly can be done simply with the help of the stateoftheartio/qt6:6.6-wasm-aqt docker image. Pull it, and then just adapt and start ./build-wasm.sh.
+Then copy the output files to your web server:
+```
+scp ../build-QDashboard-WebAssembly-Release/QDashboard.* ../build-QDashboard-WebAssembly-Release/qtlo* myserver:/var/www/html/qdashboard
+```
