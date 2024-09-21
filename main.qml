@@ -14,10 +14,11 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-    title: qsTr("QDashboard")
+    title: qsTr("QDashboard") + " (" + serverUsername + ")"
 
     property string serverBaseURI: "/qdasboard/api" // overriden by main.cpp
     property string openweatherApiKey: ""
+    property string serverUsername: ""
 
     Component.onCompleted: root.readFromServer();
 
@@ -155,7 +156,7 @@ ApplicationWindow {
 
         // call server to save content
         var xhr = new XMLHttpRequest;
-        var serviceUrl = serverBaseURI + "/session/update/"+tabIndex+"/"+rowIndex+"/"+colIndex+"/"+tileIndex;
+        var serviceUrl = serverBaseURI + "/session/"+serverUsername+"/update/"+tabIndex+"/"+rowIndex+"/"+colIndex+"/"+tileIndex;
         xhr.open("PUT", serviceUrl);
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.send(contentJsonStr);
@@ -169,7 +170,7 @@ ApplicationWindow {
 
         // call server to save content
         var xhr = new XMLHttpRequest;
-        var serviceUrl = serverBaseURI + "/session/save";
+        var serviceUrl = serverBaseURI + "/session/"+serverUsername+"/save";
         xhr.open("POST", serviceUrl);
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.send(contentJsonStr);
@@ -177,7 +178,7 @@ ApplicationWindow {
 
     function readFromServer() {
         var xhr = new XMLHttpRequest;
-        var serviceUrl = serverBaseURI + "/session/read";
+        var serviceUrl = serverBaseURI + "/session/"+serverUsername+"/read";
         xhr.open("GET", serviceUrl);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {

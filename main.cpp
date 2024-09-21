@@ -1,9 +1,12 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtGlobal>
+#include <QUrlQuery>
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <emscripten/val.h>
 
 // Propose a fallback value for qdashboard-server root URI
 #ifndef QDASHBOARD_SERVER_BASE_URI
@@ -34,16 +37,22 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char *argv[])
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
-//    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-#endif
     QGuiApplication app(argc, argv);
 
     app.setOrganizationName(QStringLiteral("Tofe"));
-    app.setApplicationName(QStringLiteral("Test app"));
+    app.setApplicationName(QStringLiteral("QDashboard"));
+
+    QString username("guest");
+
+    emscripten::val location = emscripten::val::global("location");
+    QString hostname = QString::fromEcmaString(location["hostname"]);
+    QString search = QString::fromEcmaString(location["search"]); // to retrieve the arguments
+    
+    QString serverBaseURI(QString("https://%1%2").arg(hostname).arg(QDASHBOARD_SERVER_BASE_URI));
+    
+    QUrlQuery qQuery(search.removeFirst());
+    if (qQuery.hasQueryItem("user"))
+        username = qQuery.queryItemValue("user");
 
     QQmlApplicationEngine appEngine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -57,8 +66,9 @@ int main(int argc, char *argv[])
     qInstallMessageHandler(myMessageOutput); // Install the handler
 
     appEngine.setInitialProperties({
-           { "serverBaseURI", QString(QDASHBOARD_SERVER_BASE_URI) },
-           { "openweatherApiKey", QString(STR(OPENWEATHER_API_KEY)) }
+           { "serverBaseURI", serverBaseURI },
+           { "openweatherApiKey", QString(STR(OPENWEATHER_API_KEY)) },
+           { "serverUsername", username }
     });
 
     appEngine.load(url);
